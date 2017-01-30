@@ -2,9 +2,13 @@ package myschedule.web;
 
 import java.io.File;
 
-import myschedule.quartz.extra.util.Props;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import myschedule.quartz.extra.util.Props;
 
 /**
  * Settings for MySchedule web application. See DEFAULT_SETTINGS_URL for all possible settings values, default
@@ -62,6 +66,27 @@ public class MyScheduleSettings {
         if (LOGGER.isDebugEnabled())
             for (String key : props.keySet())
                 LOGGER.debug("Settings value " + key + "=" + props.get(key));
+        
+        
+		try {
+			// override config dir with jndi
+			InitialContext initContext = new InitialContext();
+
+			Object jndiConfigFile = initContext
+					.lookup("java:comp/env/myschedule.web.schedulerSettingsDir");
+			props.put("myschedule.web.schedulerSettingsDir",
+					jndiConfigFile.toString());
+		} catch (NamingException e) {
+			//if jndi exist , ignore the properties override
+			String schedulerSettingsDir = System
+					.getProperty("myschedule.web.schedulerSettingsDir");
+			if (schedulerSettingsDir != null
+					&& !schedulerSettingsDir.equals("")) {
+				props.put("myschedule.web.schedulerSettingsDir",
+						schedulerSettingsDir);
+			}
+		}
+        	
 	}
 
 	public long getPauseTimeAfterShutdown() {
