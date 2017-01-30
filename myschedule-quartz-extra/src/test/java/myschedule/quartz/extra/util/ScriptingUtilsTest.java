@@ -1,10 +1,10 @@
 package myschedule.quartz.extra.util;
 
+import java.util.Map;
+
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.Map;
 
 /**
  * @author Zemian Deng
@@ -18,7 +18,8 @@ public class ScriptingUtilsTest {
         int resultInt = ((Number) result).intValue();
         Assert.assertThat(resultInt, Matchers.is(2));
 
-        text = "importClass(Packages.myschedule.quartz.extra.job.LoggerJob);\n" +
+        text = "load(\"nashorn:mozilla_compat.js\");"
+        		+ "importClass(Packages.myschedule.quartz.extra.job.LoggerJob);\n" +
                 "var job = new LoggerJob();\n" +
                 "job.toString();";
         result = ScriptingUtils.runScriptText("JavaScript", text, null);

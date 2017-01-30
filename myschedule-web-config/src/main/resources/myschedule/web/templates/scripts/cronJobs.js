@@ -1,9 +1,10 @@
+load("nashorn:mozilla_compat.js");
 importClass(Packages.myschedule.quartz.extra.job.LoggerJob);
 importClass(Packages.org.quartz.JobBuilder);
 importClass(Packages.org.quartz.TriggerBuilder);
 importClass(Packages.org.quartz.CronScheduleBuilder);
 var job = JobBuilder
-  .newJob(LoggerJob)
+  .newJob(LoggerJob.class)
   .withIdentity("cronJob")
   .build();
 var trigger = TriggerBuilder
