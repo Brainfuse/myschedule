@@ -76,6 +76,7 @@ public class MyScheduleSettings {
 					.lookup("java:comp/env/myschedule.web.schedulerSettingsDir");
 			props.put("myschedule.web.schedulerSettingsDir",
 					jndiConfigFile.toString());
+			LOGGER.info("scheduler config overriden by jndi {}", jndiConfigFile.toString());
 		} catch (NamingException e) {
 			//if jndi exist , ignore the properties override
 			String schedulerSettingsDir = System
@@ -84,6 +85,7 @@ public class MyScheduleSettings {
 					&& !schedulerSettingsDir.equals("")) {
 				props.put("myschedule.web.schedulerSettingsDir",
 						schedulerSettingsDir);
+				LOGGER.info("scheduler config overriden by System property {}", schedulerSettingsDir);
 			}
 		}
         	
