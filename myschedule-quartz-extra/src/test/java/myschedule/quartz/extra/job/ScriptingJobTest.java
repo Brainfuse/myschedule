@@ -1,22 +1,27 @@
 package myschedule.quartz.extra.job;
 
-import myschedule.quartz.extra.ResultJobListener;
-import myschedule.quartz.extra.SchedulerTemplate;
-import myschedule.quartz.extra.util.ClasspathURLStreamHandler;
+import static myschedule.quartz.extra.SchedulerTemplate.createJobDetail;
+import static myschedule.quartz.extra.SchedulerTemplate.createSimpleTrigger;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.net.URL;
+
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionException;
 import org.quartz.Trigger;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.net.URL;
-
-import static myschedule.quartz.extra.SchedulerTemplate.createJobDetail;
-import static myschedule.quartz.extra.SchedulerTemplate.createSimpleTrigger;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
+import myschedule.quartz.extra.ResultJobListener;
+import myschedule.quartz.extra.SchedulerTemplate;
+import myschedule.quartz.extra.util.ClasspathURLStreamHandler;
 
 public class ScriptingJobTest {
     @Test
@@ -33,7 +38,7 @@ public class ScriptingJobTest {
         st.startAndShutdown(99);
 
         assertThat(ResultJobListener.result.jobResults.size(), is(1));
-        assertThat((Double) ResultJobListener.result.jobResults.get(0), is(new Double(100.0)));
+        assertEquals(Double.valueOf(ResultJobListener.result.jobResults.get(0).toString()), new Double(100.0),0);
         assertThat(ResultJobListener.result.jobToBeExecutedTimes.size(), is(1));
         assertThat(ResultJobListener.result.jobExecutionVetoedTimes.size(), is(0));
         assertThat(ResultJobListener.result.jobWasExecutedTimes.size(), is(1));
@@ -52,7 +57,7 @@ public class ScriptingJobTest {
         st.startAndShutdown(99);
 
         assertThat(ResultJobListener.result.jobResults.size(), is(1));
-        assertThat((Double) ResultJobListener.result.jobResults.get(0), is(new Double(101.0)));
+        assertEquals(Double.valueOf(ResultJobListener.result.jobResults.get(0).toString()), new Double(101.0),0);
         assertThat(ResultJobListener.result.jobToBeExecutedTimes.size(), is(1));
         assertThat(ResultJobListener.result.jobExecutionVetoedTimes.size(), is(0));
         assertThat(ResultJobListener.result.jobWasExecutedTimes.size(), is(1));
@@ -73,7 +78,8 @@ public class ScriptingJobTest {
         st.startAndShutdown(99);
 
         assertThat(ResultJobListener.result.jobResults.size(), is(1));
-        assertThat((Double) ResultJobListener.result.jobResults.get(0), is(new Double(102.0)));
+		assertEquals(Double.valueOf(ResultJobListener.result.jobResults.get(0).toString()),
+				new Double(102.0), 0.0);
         assertThat(ResultJobListener.result.jobToBeExecutedTimes.size(), is(1));
         assertThat(ResultJobListener.result.jobExecutionVetoedTimes.size(), is(0));
         assertThat(ResultJobListener.result.jobWasExecutedTimes.size(), is(1));
@@ -101,7 +107,7 @@ public class ScriptingJobTest {
             st.startAndShutdown(99);
 
             assertThat(ResultJobListener.result.jobResults.size(), is(1));
-            assertThat((Double) ResultJobListener.result.jobResults.get(0), is(new Double(100.0)));
+            assertEquals(Double.valueOf(ResultJobListener.result.jobResults.get(0).toString()), new Double(100.0),0.0);
             assertThat(ResultJobListener.result.jobToBeExecutedTimes.size(), is(1));
             assertThat(ResultJobListener.result.jobExecutionVetoedTimes.size(), is(0));
             assertThat(ResultJobListener.result.jobWasExecutedTimes.size(), is(1));

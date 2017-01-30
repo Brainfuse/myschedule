@@ -1,3 +1,4 @@
+load("nashorn:mozilla_compat.js");
 //logger.info("Current classpath " + java.lang.System.getProperty("java.class.path"));
 //logger.info("Class: " + Packages.integration.myschedule.quartz.extra.ScriptingSchedulerPluginIT)
 logger.info("Plugin initialize");

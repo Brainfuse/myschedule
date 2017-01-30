@@ -1,20 +1,42 @@
 package myschedule.quartz.extra;
 
+import static org.quartz.CronScheduleBuilder.cronSchedule;
+import static org.quartz.JobBuilder.newJob;
+import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
+import static org.quartz.TriggerBuilder.newTrigger;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+
 import org.quartz.Calendar;
-import org.quartz.*;
+import org.quartz.CronTrigger;
+import org.quartz.Job;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobKey;
+import org.quartz.JobListener;
+import org.quartz.ListenerManager;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerContext;
+import org.quartz.SchedulerException;
+import org.quartz.SchedulerListener;
+import org.quartz.SchedulerMetaData;
+import org.quartz.SimpleTrigger;
+import org.quartz.Trigger;
 import org.quartz.Trigger.TriggerState;
+import org.quartz.TriggerKey;
+import org.quartz.TriggerListener;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.quartz.spi.JobFactory;
 import org.quartz.spi.MutableTrigger;
 import org.quartz.spi.OperableTrigger;
-
-import java.util.*;
-
-import static org.quartz.CronScheduleBuilder.cronSchedule;
-import static org.quartz.JobBuilder.newJob;
-import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
-import static org.quartz.TriggerBuilder.newTrigger;
 
 /**
  * A template to simplify creation and scheduling of Quartz jobs. This class can be very handy as one stop shop for
@@ -43,6 +65,7 @@ public class SchedulerTemplate {
             StdSchedulerFactory factory = new StdSchedulerFactory(quartzConfigFilename);
             scheduler = factory.getScheduler();
         } catch (Exception e) {
+        	e.printStackTrace();
             throw new QuartzRuntimeException("Failed to create scheduler using config file: " +
                     quartzConfigFilename, e);
         }

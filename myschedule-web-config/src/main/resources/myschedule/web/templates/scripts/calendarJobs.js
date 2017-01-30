@@ -1,3 +1,4 @@
+load("nashorn:mozilla_compat.js");
 //Create Quartz Calendar objects
 importClass(Packages.org.quartz.impl.calendar.CronCalendar);
 importClass(Packages.myschedule.quartz.extra.job.LoggerJob);
@@ -10,7 +11,7 @@ var cal = CronCalendar('* * 12-13 * * ?');
 scheduler.addCalendar('SkipLunch', cal, true, false);
 
 // Create jobs that uses the calendars.
-var job = scheduler.createJobDetail('CalJob', LoggerJob);
+var job = scheduler.createJobDetail('CalJob', LoggerJob.class);
 var trigger = scheduler.createCronTrigger('CalJob1', '0 0 * * * ?');
 trigger.setCalendarName('SkipWeekEnd');
 scheduler.scheduleJob(job, trigger);

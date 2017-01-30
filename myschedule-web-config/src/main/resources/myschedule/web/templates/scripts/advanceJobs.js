@@ -1,3 +1,4 @@
+load("nashorn:mozilla_compat.js");
 //Using CalendarIntervalTrigger
 //schedule a job that runs every 3 months
 //=========================================
@@ -7,7 +8,7 @@ importClass(Packages.org.quartz.TriggerBuilder);
 importClass(Packages.org.quartz.CalendarIntervalScheduleBuilder);
 
 var job = JobBuilder
-    .newJob(LoggerJob)
+    .newJob(LoggerJob.class)
     .withIdentity("calendarIntervalJob")
     .build();
 var trigger = TriggerBuilder
