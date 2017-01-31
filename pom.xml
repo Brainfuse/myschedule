@@ -26,6 +26,13 @@
 	</properties>
 
 	<build>
+		<extensions>
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-ftp</artifactId>
+				<version>1.0-beta-6</version>
+			</extension>
+		</extensions>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -205,6 +212,27 @@
 				</dependency>
 			</dependencies>
 		</profile>
+		<profile>
+			<id>dev-machine</id>
+			<build>
+			</build>
+			<distributionManagement>
+				<repository>
+					<uniqueVersion>false</uniqueVersion>
+					<id>dev-maven</id>
+					<name>Dev Machine Repository</name>
+					<url>ftp://dev3.trustforte.com/maven</url>
+					<layout>default</layout>
+				</repository>
+				<snapshotRepository>
+					<uniqueVersion>false</uniqueVersion>
+					<id>dev-maven</id>
+					<name>Dev Machine Repository</name>
+					<url>ftp://dev3.trustforte.com/maven</url>
+					<layout>default</layout>
+				</snapshotRepository>
+			</distributionManagement>
+		</profile>
 	</profiles>
 
 	<developers>
@@ -232,9 +260,9 @@
 		</repository>
 	</distributionManagement>
 	<scm>
-		<connection>scm:hg:file:///${basedir}</connection>
-		<developerConnection>scm:hg:${basedir}</developerConnection>
-		<url>http://code.google.com/p/myschedule/source/browse</url>
+		
+		<developerConnection>scm:git:git@github.com:Brainfuse/myschedule.git</developerConnection>
+		<url>https://github.com/Brainfuse/myschedule</url>
 	  <tag>HEAD</tag>
   </scm>
 </project>
