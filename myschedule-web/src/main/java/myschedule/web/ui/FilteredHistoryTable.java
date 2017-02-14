@@ -317,7 +317,7 @@ public class FilteredHistoryTable extends CustomComponent {
 
 		private Set<String> eventTypes;
 		private Set<String> hostIPs;
-		private Set<String> info1;
+		private Set<String> info2;
 		private Set<String> schedulerNames;
 
 		public HistoryRecordListHolder(List<HistoryRecordBean> actualBeans) {
@@ -327,13 +327,13 @@ public class FilteredHistoryTable extends CustomComponent {
 			schedulerNames = new HashSet<String>();
 			eventTypes = new HashSet<String>();
 			eventNames = new HashSet<String>();
-			info1 = new HashSet<String>();
+			info2 = new HashSet<String>();
 			for (HistoryRecordBean b : actualBeans) {
 				eventNames.add(b.getEventName());
 				eventTypes.add(b.getEventType());
 				schedulerNames.add(b.getSchedulerName());
 				hostIPs.add(b.getHostIP());
-				info1.add(b.getInfo1());
+				info2.add(b.getInfo2());
 			}
 		}
 
@@ -353,8 +353,8 @@ public class FilteredHistoryTable extends CustomComponent {
 			return Collections.unmodifiableSet(hostIPs);
 		}
 
-		public Set<String> getInfo1() {
-			return info1;
+		public Set<String> getInfo2() {
+			return info2;
 		}
 
 		public Set<String> getSchedulerNames() {
@@ -494,12 +494,13 @@ public class FilteredHistoryTable extends CustomComponent {
 					EVENT_NAME);
 
 			accordion.addTab(new DateRangeField(EVENT_TIME).init(), EVENT_TIME);
-
+			
+			//info 1 is the job key
 			accordion.addTab(
-					new CheckboxGroup(INFO_1, holder.getInfo1()).init(),
+					new TextContainsFilter(INFO_1).init(),
 					INFO_1);
-			//
-			accordion.addTab(new TextContainsFilter(INFO_2).init(), INFO_2);
+			//info 2 is the job name
+			accordion.addTab(new CheckboxGroup(INFO_2, holder.getInfo2()).init(), INFO_2);
 			accordion.addTab(new TextContainsFilter(INFO_3).init(), INFO_3);
 			accordion.addTab(new TextContainsFilter(INFO_4).init(), INFO_4);
 			accordion.addTab(new TextContainsFilter(INFO_5).init(), INFO_5);
