@@ -453,7 +453,7 @@ public class FilteredHistoryTable extends CustomComponent {
 					throw new RuntimeException(e);
 				}
 			} else {
-				retValue = (String) value;
+				retValue = value.toString();
 			}
 
 			if (trim)
