@@ -3,6 +3,7 @@ package myschedule.web.ui;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.lang.StringUtils;
 import org.quartz.JobDetail;
@@ -231,22 +232,26 @@ public class JobsWithTriggersContent extends VerticalLayout {
         List<Trigger> triggers = scheduler.getAllTriggers();
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         for (Trigger trigger : triggers) {
-        	if (trigger == null)
-        		continue;
             TriggerKey triggerKey = trigger.getKey();
             JobKey jobKey = trigger.getJobKey();
-            JobDetail jobDetail = scheduler.getJobDetail(jobKey);
-			if (jobDetail == null || jobDetail.getJobClass() == null)
-				continue;
+            
             Date nextFireTime = trigger.getNextFireTime();
             Date previousFireTime = trigger.getPreviousFireTime();
             String triggerKeyName = triggerKey.getName() + "/" + triggerKey.getGroup();
             Trigger.TriggerState triggerState = scheduler.getTriggerState(triggerKey);
-            
-            Object[] row = new Object[]{
+
+            String triggerClassName = Optional.ofNullable(trigger)
+					.map(t -> t.getClass()).map(Class::getSimpleName)
+					.orElse("nullTrigger");
+            JobDetail jobDetail = scheduler.getJobDetail(jobKey);
+			String jobDetailClassName = Optional.ofNullable(jobDetail)
+					.map(j -> j.getClass()).map(Class::getSimpleName)
+					.orElse("nullJobDetail");
+
+			Object[] row = new Object[]{
                     triggerKeyName,
                     jobKey.getName() + "/" + jobKey.getGroup(),
-                    trigger.getClass().getSimpleName() + "/" + jobDetail.getJobClass().getSimpleName(),
+                    triggerClassName + "/" + jobDetailClassName,
                     (nextFireTime == null) ? "" : df.format(nextFireTime),
                     (previousFireTime == null) ? "" : df.format(previousFireTime),
                     triggerState.toString()
