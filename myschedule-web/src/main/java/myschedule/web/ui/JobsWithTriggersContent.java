@@ -1,14 +1,9 @@
 package myschedule.web.ui;
 
-import com.vaadin.data.Item;
-import com.vaadin.data.Property;
-import com.vaadin.event.ItemClickEvent;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.VerticalLayout;
-import myschedule.quartz.extra.SchedulerTemplate;
-import myschedule.web.MySchedule;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
@@ -18,9 +13,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vaadin.dialogs.ConfirmDialog;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
+import com.vaadin.data.Item;
+import com.vaadin.data.Property;
+import com.vaadin.event.ItemClickEvent;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Table;
+import com.vaadin.ui.VerticalLayout;
+
+import myschedule.quartz.extra.SchedulerTemplate;
+import myschedule.web.MySchedule;
 
 /**s
  * JobsWithTriggersContents provide a table view for all JobDetails that have triggers associated.
@@ -229,13 +231,18 @@ public class JobsWithTriggersContent extends VerticalLayout {
         List<Trigger> triggers = scheduler.getAllTriggers();
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         for (Trigger trigger : triggers) {
+        	if (trigger == null)
+        		continue;
             TriggerKey triggerKey = trigger.getKey();
             JobKey jobKey = trigger.getJobKey();
             JobDetail jobDetail = scheduler.getJobDetail(jobKey);
+			if (jobDetail == null || jobDetail.getJobClass() == null)
+				continue;
             Date nextFireTime = trigger.getNextFireTime();
             Date previousFireTime = trigger.getPreviousFireTime();
             String triggerKeyName = triggerKey.getName() + "/" + triggerKey.getGroup();
             Trigger.TriggerState triggerState = scheduler.getTriggerState(triggerKey);
+            
             Object[] row = new Object[]{
                     triggerKeyName,
                     jobKey.getName() + "/" + jobKey.getGroup(),
