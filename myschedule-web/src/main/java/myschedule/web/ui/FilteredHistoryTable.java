@@ -1,5 +1,7 @@
 package myschedule.web.ui;
 
+import java.sql.Clob;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -431,6 +433,37 @@ public class FilteredHistoryTable extends CustomComponent {
 
 	private static final long serialVersionUID = 6894801051461901373L;
 
+	/**
+	 * Copied from Tools.cStr we don't have core library imports here except
+	 * return empty string instead of null
+	 * 
+	 * @param value
+	 * @param trim
+	 * @return
+	 */
+	private static String toolsCStr(Object value, boolean trim) {
+		if (value != null) {
+
+			String retValue = null;
+			if (value instanceof java.sql.Clob) {
+				Clob clob = (Clob) value;
+				try {
+					retValue = clob.getSubString(1, (int) clob.length());
+				} catch (SQLException e) {
+					throw new RuntimeException(e);
+				}
+			} else {
+				retValue = (String) value;
+			}
+
+			if (trim)
+				retValue = retValue.trim();
+
+			return retValue;
+		}
+		return "";
+	}
+
 	private HistoryRecordListHolder cachedTableData;
 
 	private IndexedContainer container;
@@ -526,7 +559,7 @@ public class FilteredHistoryTable extends CustomComponent {
 					Notification.Type.WARNING_MESSAGE);
 		}
 	}
-
+	
 	private HistoryRecordListHolder getCachedTableData()
 			throws NoPluginException {
 
@@ -546,7 +579,8 @@ public class FilteredHistoryTable extends CustomComponent {
 				String info2 = toStr(history.get(7));
 				String info3 = toStr(history.get(8));
 				String info4 = toStr(history.get(9));
-				String info5 = toStr(history.get(10));
+				//We updated info5 to clob, use the cStr from Tools
+				String info5 = toolsCStr(history.get(10),true);
 
 				beans.add(new HistoryRecordBean(ip, schedulerName, eventType,
 						eventName, eventTime, info1, info2, info3, info4,
@@ -557,6 +591,7 @@ public class FilteredHistoryTable extends CustomComponent {
 		}
 		return cachedTableData;
 	}
+
 
 	private List<List<Object>> getDataFromJdbc() throws NoPluginException {
 		MySchedule mySchedule = MySchedule.getInstance();
