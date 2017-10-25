@@ -1,22 +1,28 @@
 package myschedule.web.ui;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+import org.apache.commons.lang.StringUtils;
+import org.quartz.JobDetail;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobKey;
+import org.quartz.Trigger;
+import org.quartz.TriggerKey;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.vaadin.dialogs.ConfirmDialog;
+
 import com.vaadin.data.Property;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
+
 import myschedule.quartz.extra.SchedulerTemplate;
 import myschedule.web.MySchedule;
-import org.apache.commons.lang.StringUtils;
-import org.quartz.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.vaadin.dialogs.ConfirmDialog;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
 
 /**s
  * JobsRunningContent provides a table view for all the current running jobs in scheduler. Note that typical job in
@@ -172,7 +178,7 @@ public class JobsRunningContent extends VerticalLayout {
             Object[] row = new Object[]{
                     triggerKeyName,
                     jobKey.getName() + "/" + jobKey.getGroup(),
-                    trigger.getClass().getSimpleName() + "/" + jobDetail.getJobClass().getSimpleName(),
+                    trigger.getClass().getSimpleName() + "/" + jobDetail.toString(),
                     (nextFireTime == null) ? "" : df.format(nextFireTime),
                     (previousFireTime == null) ? "" : df.format(previousFireTime)
             };
