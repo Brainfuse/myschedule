@@ -1,19 +1,37 @@
 package myschedule.quartz.extra;
 
-import org.quartz.*;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.quartz.Job;
+import org.quartz.JobBuilder;
+import org.quartz.JobDetail;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.SimpleScheduleBuilder;
+import org.quartz.Trigger;
 import org.quartz.Trigger.CompletedExecutionInstruction;
+import org.quartz.TriggerBuilder;
+import org.quartz.TriggerKey;
+import org.quartz.TriggerListener;
 import org.quartz.spi.ClassLoadHelper;
 import org.quartz.spi.SchedulerPlugin;
 import org.quartz.utils.DBConnectionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 /**
  * This plugin will record a row in a database table for each event (methods) in SchedulerPlugin and TriggerListener.
@@ -96,9 +114,18 @@ import java.util.List;
  *
  * @author Zemian Deng <saltnlight5@gmail.com>
  */
-public class JdbcSchedulerHistoryPlugin implements SchedulerPlugin {
+public class JdbcSchedulerHistoryPlugin extends UnicastRemoteObject implements SchedulerPlugin, JdbcSchedulerRemoteInterface {
 
-    public static final String DEFAULT_SCHEDULER_CONTEXT_KEY = "JdbcSchedulerHistoryPlugin.Instance";
+    public JdbcSchedulerHistoryPlugin() throws RemoteException {
+		super();
+	}
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1453787333577974332L;
+
+	public static final String DEFAULT_SCHEDULER_CONTEXT_KEY = "JdbcSchedulerHistoryPlugin.Instance";
 
     private static final Logger logger = LoggerFactory.getLogger(JdbcSchedulerHistoryPlugin.class);
     private String name;
@@ -143,7 +170,11 @@ public class JdbcSchedulerHistoryPlugin implements SchedulerPlugin {
         return deleteIntervalInSecs;
     }
 
-    public List<List<Object>> getJobHistoryData() {
+    /* (non-Javadoc)
+	 * @see myschedule.quartz.extra.JdbcSchedulerRemoteInterface#getJobHistoryData()
+	 */
+    @Override
+	public List<List<Object>> getJobHistoryData() {
         final List<List<Object>> result = new ArrayList<List<Object>>();
         withConn(new ConnAction() {
             @Override
