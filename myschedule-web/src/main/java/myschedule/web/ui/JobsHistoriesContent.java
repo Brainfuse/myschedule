@@ -1,5 +1,6 @@
 package myschedule.web.ui;
 
+import java.rmi.RemoteException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -26,7 +27,7 @@ public class JobsHistoriesContent extends VerticalLayout {
     
     private FilteredHistoryTable filteredTable;
 
-    public JobsHistoriesContent(MyScheduleUi myScheduleUi, String schedulerSettingsName) {
+    public JobsHistoriesContent(MyScheduleUi myScheduleUi, String schedulerSettingsName) throws RemoteException {
         this.myScheduleUi = myScheduleUi;
         this.schedulerSettingsName = schedulerSettingsName;
         initToolbar();
@@ -46,7 +47,11 @@ public class JobsHistoriesContent extends VerticalLayout {
         button.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent event) {
-                filteredTable.refresh();
+                try {
+					filteredTable.refresh();
+				} catch (RemoteException e) {
+					throw new RuntimeException(e);
+				}
             }
         });
         return button;

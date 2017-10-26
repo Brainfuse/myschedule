@@ -1,18 +1,25 @@
 package myschedule.web.ui;
 
-import com.vaadin.data.Property;
-import com.vaadin.ui.*;
-import myschedule.quartz.extra.SchedulerTemplate;
-import myschedule.quartz.extra.util.ScriptingUtils;
-import myschedule.quartz.extra.util.Utils;
-import myschedule.web.SchedulerSettings;
+import java.rmi.RemoteException;
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Map;
+import com.vaadin.data.Property;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.ListSelect;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.VerticalLayout;
+
+import myschedule.quartz.extra.SchedulerTemplate;
+import myschedule.quartz.extra.ScriptExecutor;
+import myschedule.quartz.extra.util.ScriptingUtils;
+import myschedule.web.SchedulerSettings;
 
 /**
  * A popup UI window to display scripting console text editor to manipulate a scheduler.
@@ -153,10 +160,12 @@ public class ScriptConsoleWindow extends EditorWindow {
     private void runScriptText(String scriptEngineName, String scriptText) {
         // Bind scheduler as implicit variable
         SchedulerTemplate scheduler = mySchedule.getScheduler(schedulerSettingsName);
-        Map<String, Object> bindings = Utils.toMap("scheduler", scheduler);
+        ScriptExecutor executor = (ScriptExecutor) scheduler
+				.getContext().get(ScriptExecutor.SCRIPT_EXECUTOR_KEY);
+        
         try {
-            ScriptingUtils.runScriptText(scriptEngineName, scriptText, bindings);
-        } catch (RuntimeException e) {
+        	executor.execute(scriptEngineName, scriptText);
+        } catch (RuntimeException | RemoteException e) {
             myScheduleUi.addWindow(new ErrorWindow(e));
         }
     }

@@ -1,5 +1,6 @@
 package myschedule.web.ui;
 
+import java.rmi.RemoteException;
 import java.sql.Clob;
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -38,7 +39,7 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
-import myschedule.quartz.extra.JdbcSchedulerHistoryPlugin;
+import myschedule.quartz.extra.JdbcSchedulerRemoteInterface;
 import myschedule.quartz.extra.SchedulerTemplate;
 import myschedule.web.MySchedule;
 
@@ -474,7 +475,7 @@ public class FilteredHistoryTable extends CustomComponent {
 
 	private final Table table;
 
-	public FilteredHistoryTable(String schedulerSettingsName) {
+	public FilteredHistoryTable(String schedulerSettingsName) throws RemoteException {
 		this.schedulerSettingsName = schedulerSettingsName;
 		container = new IndexedContainer();
 		table = new Table();
@@ -561,7 +562,7 @@ public class FilteredHistoryTable extends CustomComponent {
 	}
 	
 	private HistoryRecordListHolder getCachedTableData()
-			throws NoPluginException {
+			throws NoPluginException, RemoteException {
 
 		if (cachedTableData == null) {
 
@@ -593,13 +594,13 @@ public class FilteredHistoryTable extends CustomComponent {
 	}
 
 
-	private List<List<Object>> getDataFromJdbc() throws NoPluginException {
+	private List<List<Object>> getDataFromJdbc() throws NoPluginException, RemoteException {
 		MySchedule mySchedule = MySchedule.getInstance();
 		SchedulerTemplate scheduler = mySchedule
 				.getScheduler(schedulerSettingsName);
 		String key = mySchedule.getMyScheduleSettings()
 				.getJdbcSchedulerHistoryPluginContextKey();
-		JdbcSchedulerHistoryPlugin plugin = (JdbcSchedulerHistoryPlugin) scheduler
+		JdbcSchedulerRemoteInterface plugin = (JdbcSchedulerRemoteInterface) scheduler
 				.getContext().get(key);
 		if (plugin == null) {
 			String msg = "No JdbcSchedulerHistoryPlugin detected! Please configure this plugin to record scheduler "
@@ -612,7 +613,7 @@ public class FilteredHistoryTable extends CustomComponent {
 	}
 
 	@SuppressWarnings("unchecked")
-	void loadDataIntoContainer() throws NoPluginException {
+	void loadDataIntoContainer() throws NoPluginException, RemoteException {
 		HistoryRecordListHolder tableData = getCachedTableData();
 
 		container.removeAllItems();
@@ -633,7 +634,7 @@ public class FilteredHistoryTable extends CustomComponent {
 		}
 	}
 
-	public void refresh() {
+	public void refresh() throws RemoteException {
 		try {
 			this.cachedTableData = null;
 			loadDataIntoContainer();

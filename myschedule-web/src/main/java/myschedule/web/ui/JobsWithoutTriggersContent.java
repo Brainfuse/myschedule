@@ -1,13 +1,7 @@
 package myschedule.web.ui;
 
-import com.vaadin.data.Property;
-import com.vaadin.event.ItemClickEvent;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.VerticalLayout;
-import myschedule.quartz.extra.SchedulerTemplate;
-import myschedule.web.MySchedule;
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
@@ -15,7 +9,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vaadin.dialogs.ConfirmDialog;
 
-import java.util.List;
+import com.vaadin.data.Property;
+import com.vaadin.event.ItemClickEvent;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Table;
+import com.vaadin.ui.VerticalLayout;
+
+import myschedule.quartz.extra.SchedulerTemplate;
+import myschedule.web.MySchedule;
 
 /**
  * JobsWithoutTriggersContent provides a table view for all JobDetails that do not have triggers associated.
@@ -181,7 +183,7 @@ public class JobsWithoutTriggersContent extends VerticalLayout {
             String jobKeyName = jobKey.getName() + "/" + jobKey.getGroup();
             Object[] row = new Object[]{
                     jobKeyName,
-                    jobDetail.getClass().getSimpleName() + "/" + jobDetail.getJobClass().getSimpleName()
+                    jobDetail.getClass().getSimpleName() + "/" + jobDetail.toString()
             };
             table.addItem(row, jobKeyName);
         }

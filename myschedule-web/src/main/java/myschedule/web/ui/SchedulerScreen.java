@@ -1,5 +1,7 @@
 package myschedule.web.ui;
 
+import java.rmi.RemoteException;
+
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.VerticalLayout;
 
@@ -74,7 +76,11 @@ public class SchedulerScreen extends VerticalLayout {
                         // Set select tab to jobsWithTrigger view.
                         tabSheet.setSelectedTab(jobsWithTriggersContent);
                     } else if (selectedContent == jobsHistoriesContent) {
-                        switchJobsHistoriesContent();
+                        try {
+							switchJobsHistoriesContent();
+						} catch (RemoteException e) {
+							throw new RuntimeException(e);
+						}
                     } else if (selectedContent == scriptConsoleContent) {
                         ScriptConsoleWindow console = new ScriptConsoleWindow(myScheduleUi, schedulerSettingsName);
                         myScheduleUi.addWindow(console);
@@ -150,7 +156,7 @@ public class SchedulerScreen extends VerticalLayout {
             jobsHistoriesContent.removeAllComponents();
         }
 
-        void switchJobsHistoriesContent() {
+        void switchJobsHistoriesContent() throws RemoteException {
             jobsHistoriesContent.removeAllComponents();
             jobsHistoriesContent.addComponent(new JobsHistoriesContent(myScheduleUi, schedulerSettingsName));
 

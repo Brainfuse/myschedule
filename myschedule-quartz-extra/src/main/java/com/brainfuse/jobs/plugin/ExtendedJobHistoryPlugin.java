@@ -1,9 +1,10 @@
-package myschedule.quartz.extra;
+package com.brainfuse.jobs.plugin;
 
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,12 +14,15 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import org.quartz.Job;
 import org.quartz.JobBuilder;
+import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SimpleScheduleBuilder;
@@ -32,6 +36,10 @@ import org.quartz.spi.SchedulerPlugin;
 import org.quartz.utils.DBConnectionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import myschedule.quartz.extra.JdbcSchedulerHistoryPlugin;
+import myschedule.quartz.extra.QuartzRuntimeException;
+import myschedule.quartz.extra.SimpleSchedulerListener;
 
 /**
  * This plugin will record a row in a database table for each event (methods) in SchedulerPlugin and TriggerListener.
@@ -113,23 +121,29 @@ import org.slf4j.LoggerFactory;
  * info3 = [FireInstanceId], info4 = [fireTime], info5 = [CompletedExecutionInstruction].
  *
  * @author Zemian Deng <saltnlight5@gmail.com>
+ * 
+ * BF modification
+ * @author jialu
  */
-public class JdbcSchedulerHistoryPlugin extends UnicastRemoteObject implements SchedulerPlugin, JdbcSchedulerRemoteInterface {
 
-    public JdbcSchedulerHistoryPlugin() throws RemoteException {
+// why extends JdbcSchedulerHistoryPlugin because the ui code casting without checking or using interface
+public class ExtendedJobHistoryPlugin
+extends JdbcSchedulerHistoryPlugin implements SchedulerPlugin, Serializable, Remote {
+
+    public ExtendedJobHistoryPlugin() throws RemoteException {
 		super();
 	}
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -1453787333577974332L;
+	private static final long serialVersionUID = 8688584207098985526L;
 
 	public static final String DEFAULT_SCHEDULER_CONTEXT_KEY = "JdbcSchedulerHistoryPlugin.Instance";
 
-    private static final Logger logger = LoggerFactory.getLogger(JdbcSchedulerHistoryPlugin.class);
+    private static final Logger logger = LoggerFactory.getLogger(ExtendedJobHistoryPlugin.class);
     private String name;
-    private Scheduler scheduler;
+    private transient Scheduler scheduler;
     private String localIp;
     private String localHost;
     private String schedulerNameAndId;
@@ -170,11 +184,7 @@ public class JdbcSchedulerHistoryPlugin extends UnicastRemoteObject implements S
         return deleteIntervalInSecs;
     }
 
-    /* (non-Javadoc)
-	 * @see myschedule.quartz.extra.JdbcSchedulerRemoteInterface#getJobHistoryData()
-	 */
-    @Override
-	public List<List<Object>> getJobHistoryData() {
+    public List<List<Object>> getJobHistoryData() {
         final List<List<Object>> result = new ArrayList<List<Object>>();
         withConn(new ConnAction() {
             @Override
@@ -243,23 +253,15 @@ public class JdbcSchedulerHistoryPlugin extends UnicastRemoteObject implements S
     }
 
     private void withConn(ConnAction action) {
-        Connection conn = null;
-        try {
-            conn = DBConnectionManager.getInstance().getConnection(dataSourceName);
-            action.onConn(conn);
-        } catch (SQLException e) {
-            throw new QuartzRuntimeException("Failed to execute DB connection action.", e);
-        } finally {
-            if (conn != null) {
-                try {
-                    conn.close();
-                    conn = null;
-                } catch (SQLException e) {
-                    throw new QuartzRuntimeException("Failed to close DB connection.", e);
-                }
-            }
-        }
-    }
+
+		try (Connection conn = DBConnectionManager.getInstance()
+				.getConnection(dataSourceName)) {
+			action.onConn(conn);
+		} catch (SQLException e) {
+			throw new QuartzRuntimeException(
+					"Failed to execute DB connection action.", e);
+		}
+	}
 
     private static interface ConnAction {
         void onConn(Connection conn) throws SQLException;
@@ -470,8 +472,9 @@ public class JdbcSchedulerHistoryPlugin extends UnicastRemoteObject implements S
                     cause.getClass().getName(),
                     null,
                     null,
-                    null
+                    cause.getMessage()//we modified the last field to hold 4000 varchar
             };
+            logger.error("",cause);
             insertHistory(insertSql, params);
         }
 
@@ -537,11 +540,11 @@ public class JdbcSchedulerHistoryPlugin extends UnicastRemoteObject implements S
             }
         }
 
-//        @Override
-//        public void schedulerShutdown() {
-//            // TODO: We can not insert SQL data here yet. See QTZ-257.
-//            //       For now, the workaround is use schedulerShuttingdown(), which called before all pending jobs are
-//            //       completed.
+        @Override
+        public void schedulerShutdown() {
+            // TODO: We can not insert SQL data here yet. See QTZ-257.
+            //       For now, the workaround is use schedulerShuttingdown(), which called before all pending jobs are
+            //       completed.
 //			Object[] params = new Object[] {
 //				localIp,
 //				localHost,
@@ -556,7 +559,7 @@ public class JdbcSchedulerHistoryPlugin extends UnicastRemoteObject implements S
 //				null
 //			};
 //			insertHistory(insertSql, params);
-//        }
+        }
 
         @Override
         public void schedulerShuttingdown() {
@@ -575,6 +578,38 @@ public class JdbcSchedulerHistoryPlugin extends UnicastRemoteObject implements S
             };
             insertHistory(insertSql, params);
         }
+
+        @Override
+        public void schedulingDataCleared() {
+        }
+
+        @Override
+        public void jobAdded(JobDetail jobDetail) {
+        }
+
+        @Override
+        public void jobDeleted(JobKey jobKey) {
+        }
+
+        @Override
+        public void jobPaused(JobKey jobKey) {
+        }
+
+        @Override
+        public void jobsPaused(String jobGroup) {
+        }
+
+        @Override
+        public void jobResumed(JobKey jobKey) {
+        }
+
+        @Override
+        public void jobsResumed(String jobGroup) {
+        }
+
+        @Override
+        public void triggerFinalized(Trigger trigger) {
+        }
     }
 
     private class HistoryTriggerListener implements TriggerListener {
@@ -585,6 +620,7 @@ public class JdbcSchedulerHistoryPlugin extends UnicastRemoteObject implements S
 
         @Override
         public void triggerFired(Trigger trigger, JobExecutionContext context) {
+			String mergedParams = getParams(context.getMergedJobDataMap());
             Object[] params = new Object[]{
                     localIp,
                     localHost,
@@ -596,11 +632,25 @@ public class JdbcSchedulerHistoryPlugin extends UnicastRemoteObject implements S
                     trigger.getJobKey().toString(),
                     context.getFireInstanceId(),
                     context.getFireTime(),
-                    null
+                    mergedParams
             };
 
             insertHistory(insertSql, params);
         }
+
+		String getParams(JobDataMap map) {
+			if (map == null || map.isEmpty())
+				return "params:empty";
+
+			String mergedParams = "params:"
+					+ map.entrySet().stream().map(entry -> {
+						if (entry == null)
+							return "";
+						return String.join("=", entry.getKey(),
+								Objects.toString(entry.getValue()));
+					}).reduce((a, b) -> a + "," + b).orElse("empty");
+			return mergedParams;
+		}
 
         @Override
         public boolean vetoJobExecution(Trigger trigger, JobExecutionContext context) {
@@ -621,7 +671,7 @@ public class JdbcSchedulerHistoryPlugin extends UnicastRemoteObject implements S
                     trigger.getJobKey().toString(),
                     null,
                     null,
-                    null
+                    getParams(trigger.getJobDataMap())
             };
 
             insertHistory(insertSql, params);
@@ -641,7 +691,7 @@ public class JdbcSchedulerHistoryPlugin extends UnicastRemoteObject implements S
                     trigger.getJobKey().toString(),
                     context.getFireInstanceId(),
                     context.getFireTime(),
-                    triggerInstructionCode.toString()
+                    triggerInstructionCode.toString() + " " +getParams(context.getMergedJobDataMap())
             };
 
             insertHistory(insertSql, params);

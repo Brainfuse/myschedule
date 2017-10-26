@@ -1,16 +1,17 @@
 package myschedule.web.ui;
 
-import com.vaadin.ui.Table;
-import myschedule.quartz.extra.SchedulerTemplate;
-import myschedule.web.MySchedule;
+import java.util.Map;
+import java.util.TreeMap;
+
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.SimpleDateFormat;
-import java.util.Map;
-import java.util.TreeMap;
+import com.vaadin.ui.Table;
+
+import myschedule.quartz.extra.SchedulerTemplate;
+import myschedule.web.MySchedule;
 
 /**
  * A UI popup window to display JobDetails information (ones without any triggers associated with).
@@ -48,7 +49,7 @@ public class JobsWithoutTriggersWindow extends AbstractWindow {
         int index = 1;
         addTableItem(table, index++, "Job Key", "" + jobDetailKey);
         addTableItem(table, index++, "Description", "" + toStr(job.getDescription()));
-        addTableItem(table, index++, "Class", "" + job.getJobClass());
+        addTableItem(table, index++, "Class", "" + job.toString());
         addTableItem(table, index++, "ConcurrentExecutionDisallowed", "" + toStr(job.isConcurrentExectionDisallowed()));
         addTableItem(table, index++, "Durable", "" + toStr(job.isDurable()));
         addTableItem(table, index++, "PersistJobDataAfterExecution", "" + toStr(job.isPersistJobDataAfterExecution()));
