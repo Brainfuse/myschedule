@@ -3,7 +3,6 @@ package myschedule.quartz.extra;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -32,6 +31,8 @@ import org.quartz.spi.SchedulerPlugin;
 import org.quartz.utils.DBConnectionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.brainfuse.jobs.plugin.SharedUnicastPlugin;
 
 /**
  * This plugin will record a row in a database table for each event (methods) in SchedulerPlugin and TriggerListener.
@@ -114,7 +115,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Zemian Deng <saltnlight5@gmail.com>
  */
-public class JdbcSchedulerHistoryPlugin extends UnicastRemoteObject implements SchedulerPlugin, JdbcSchedulerRemoteInterface {
+public class JdbcSchedulerHistoryPlugin extends SharedUnicastPlugin implements SchedulerPlugin, JdbcSchedulerRemoteInterface {
 
     public JdbcSchedulerHistoryPlugin() throws RemoteException {
 		super();
@@ -293,7 +294,7 @@ public class JdbcSchedulerHistoryPlugin extends UnicastRemoteObject implements S
 
     @SuppressWarnings("unchecked")
     @Override
-    public void initialize(String name, Scheduler scheduler, ClassLoadHelper loadHelper) throws SchedulerException {
+    public void initializeInternal(String name, Scheduler scheduler, ClassLoadHelper loadHelper) throws SchedulerException {
         this.name = name;
         this.scheduler = scheduler;
         this.localIp = retrieveLocalIp();

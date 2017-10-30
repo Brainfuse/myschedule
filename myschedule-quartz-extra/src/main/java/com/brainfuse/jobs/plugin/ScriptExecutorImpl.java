@@ -1,7 +1,6 @@
 package com.brainfuse.jobs.plugin;
 
 import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.Map;
 
 import org.quartz.Scheduler;
@@ -13,7 +12,7 @@ import myschedule.quartz.extra.ScriptExecutor;
 import myschedule.quartz.extra.util.ScriptingUtils;
 import myschedule.quartz.extra.util.Utils;
 
-public class ScriptExecutorImpl extends UnicastRemoteObject
+public class ScriptExecutorImpl extends SharedUnicastPlugin
 implements ScriptExecutor, SchedulerPlugin{
 	Scheduler scheduler;
 	public ScriptExecutorImpl() throws RemoteException {
@@ -41,7 +40,7 @@ implements ScriptExecutor, SchedulerPlugin{
 	}
 
 	@Override
-	public void initialize(String name, Scheduler scheduler,
+	public void initializeInternal(String name, Scheduler scheduler,
 			ClassLoadHelper loadHelper) throws SchedulerException {
 		this.scheduler=scheduler;
 		
