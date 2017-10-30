@@ -155,6 +155,7 @@ extends JdbcSchedulerHistoryPlugin implements SchedulerPlugin, Serializable, Rem
     private String schedulerContextKey;
     private long deleteIntervalInSecs;
     private int[] columnSqlTypes;
+    private Boolean exportRMI;
 
     public void setSchedulerContextKey(String schedulerContextKey) {
         this.schedulerContextKey = schedulerContextKey;
@@ -295,7 +296,7 @@ extends JdbcSchedulerHistoryPlugin implements SchedulerPlugin, Serializable, Rem
 
     @SuppressWarnings("unchecked")
     @Override
-    public void initialize(String name, Scheduler scheduler, ClassLoadHelper loadHelper) throws SchedulerException {
+    public void initializeInternal(String name, Scheduler scheduler, ClassLoadHelper loadHelper) throws SchedulerException {
         this.name = name;
         this.scheduler = scheduler;
         this.localIp = retrieveLocalIp();
