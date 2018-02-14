@@ -25,11 +25,8 @@ public abstract class SharedUnicastPlugin extends UnicastRemoteObject
 			ClassLoadHelper loadHelper) throws SchedulerException {
 
 		initializeInternal(name, scheduler, loadHelper);
-		try {
-			this.unexportIfSet();
-		} catch (NoSuchObjectException e) {
-			// skip unexport if error
-		}
+		this.unexportIfSet();
+
 	}
 
 	protected abstract void initializeInternal(String name, Scheduler scheduler,
@@ -43,9 +40,13 @@ public abstract class SharedUnicastPlugin extends UnicastRemoteObject
 		this.exportRMI = exportRMI;
 	}
 
-	public void unexportIfSet() throws NoSuchObjectException {
+	public void unexportIfSet() {
 		if (isExportRMI())
 			return;
-		unexportObject(this, true);
+		try {
+			unexportObject(this, true);
+		} catch (NoSuchObjectException e) {
+			//ok to ignore
+		}
 	}
 }
