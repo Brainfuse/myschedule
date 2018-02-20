@@ -232,6 +232,8 @@ public class JobsWithTriggersContent extends VerticalLayout {
         List<Trigger> triggers = scheduler.getAllTriggers();
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         for (Trigger trigger : triggers) {
+        	if (trigger == null)
+        		continue;
             TriggerKey triggerKey = trigger.getKey();
             JobKey jobKey = trigger.getJobKey();
             
