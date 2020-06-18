@@ -27,6 +27,7 @@ public class JobsHistoriesContent extends VerticalLayout {
     HorizontalLayout toolbar;
     
     private FilteredHistoryTable filteredTable;
+	private PopupView filtersPopup;
 
     public JobsHistoriesContent(MyScheduleUi myScheduleUi, String schedulerSettingsName) throws RemoteException {
         this.myScheduleUi = myScheduleUi;
@@ -40,11 +41,22 @@ public class JobsHistoriesContent extends VerticalLayout {
     private void initToolbar() {
         toolbar = new HorizontalLayout();
         addComponent(toolbar);
-        PopupView filtersButton = new PopupView("Filters", filteredTable.getFiltersLayout());
-		toolbar.addComponent(filtersButton);
+        filtersPopup = new PopupView("", filteredTable.getFiltersLayout());
+		toolbar.addComponent(createFiltersButton());
+        toolbar.addComponent(filtersPopup);
         toolbar.addComponent(createRefreshButton());
     }
    
+    private Button createFiltersButton() {
+        Button button = new Button("Filters");
+        button.addClickListener(new Button.ClickListener() {
+            @Override
+			public void buttonClick(Button.ClickEvent event) {
+				filtersPopup.setPopupVisible(true);
+			}
+        });
+        return button;
+    }
 
     private Button createRefreshButton() {
         Button button = new Button("Refresh");

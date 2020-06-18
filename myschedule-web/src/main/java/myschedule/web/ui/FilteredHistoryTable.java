@@ -6,10 +6,13 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -31,7 +34,6 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.PopupDateField;
@@ -172,7 +174,7 @@ public class FilteredHistoryTable extends CustomComponent {
 				@Override
 				public void valueChange(ValueChangeEvent event) {
 
-					container.removeContainerFilters(columnID);
+					removeContainerFilter(columnID);
 
 					Date inputStart = start.getValue() == null ? new Date()
 							: start.getValue();
@@ -184,7 +186,7 @@ public class FilteredHistoryTable extends CustomComponent {
 							? inputEnd : inputStart;
 					logger.debug("filter dates {} ~ {}", filterStart,
 							filterEnd);
-					container.addContainerFilter(new Filter() {
+					addContainerFilter(columnID, new Filter() {
 
 						private static final long serialVersionUID = 1691912829845711349L;
 
@@ -475,17 +477,20 @@ public class FilteredHistoryTable extends CustomComponent {
 
 	private final Table table;
 
+	private Map<String,Filter> filtersCache;
+
 	public FilteredHistoryTable(String schedulerSettingsName) throws RemoteException {
 		this.schedulerSettingsName = schedulerSettingsName;
 		container = new IndexedContainer();
 		table = new Table();
+		filtersCache = new HashMap<>();
 
 		try {
 			
-			HorizontalSplitPanel rootComponent = new HorizontalSplitPanel();
-			setCompositionRoot(rootComponent);
-			rootComponent.setSplitPosition(250, Unit.PIXELS);
-			rootComponent.setHeight(600, Unit.PIXELS);
+//			HorizontalLayout rootComponent = new HorizontalLayout();
+			setCompositionRoot(table);
+//			rootComponent.setSplitPosition(250, Unit.PIXELS);
+//			rootComponent.setHeight(600, Unit.PIXELS);
 			
 			logger.info("init filterable history table for {}",
 					schedulerSettingsName);
@@ -553,7 +558,7 @@ public class FilteredHistoryTable extends CustomComponent {
 			table.setColumnWidth(INFO_5, 600);
 
 //			rootComponent.addComponent(filtersLayout);
-			rootComponent.addComponent(table);
+//			rootComponent.addComponent(table);
 
 			logger.info("finished init history table");
 		} catch (NoPluginException e) {
@@ -618,9 +623,15 @@ public class FilteredHistoryTable extends CustomComponent {
 		HistoryRecordListHolder tableData = getCachedTableData();
 
 		container.removeAllItems();
+		
 		container.removeAllContainerFilters();
+		
 		for (HistoryRecordBean bean : tableData.getActualBeans()) {
 			Item addItem = container.getItem(container.addItem());
+			if(addItem == null) {
+				// Item is filtered by an existing filter.
+				continue;
+			}
 			addItem.getItemProperty(HOST_IP_NAME).setValue(bean.getHostIP());
 			addItem.getItemProperty(SCHEDULER_NAME)
 					.setValue(bean.getSchedulerName());
@@ -633,6 +644,7 @@ public class FilteredHistoryTable extends CustomComponent {
 			addItem.getItemProperty(INFO_4).setValue(bean.getInfo4());
 			addItem.getItemProperty(INFO_5).setValue(bean.getInfo5());
 		}
+		filtersCache.entrySet().forEach(e-> container.addContainerFilter(e.getValue()));
 	}
 
 	public void refresh() throws RemoteException {
@@ -663,11 +675,11 @@ public class FilteredHistoryTable extends CustomComponent {
 
 	private void updateFilters(final String columnID, String whileListValue) {
 
-		container.removeContainerFilters(columnID);
-
+		removeContainerFilter(columnID);
 		if (whileListValue == null) {
 			// block everything
-			container.addContainerFilter(new Filter() {
+//			
+			Filter filter = new Filter() {
 
 				private static final long serialVersionUID = 3249884161445620906L;
 
@@ -681,7 +693,8 @@ public class FilteredHistoryTable extends CustomComponent {
 						throws UnsupportedOperationException {
 					return false;
 				}
-			});
+			};
+			addContainerFilter(columnID, filter);
 			return;
 		}
 
@@ -689,16 +702,9 @@ public class FilteredHistoryTable extends CustomComponent {
 		if ("".equals(whileListValue))
 			return;
 
-		final List<String> whileLists = new ArrayList<String>();
-		if (whileListValue.contains(",")) {
-			for (String w : whileListValue.split(",")) {
-				whileLists.add(w);
-			}
-		} else {
-			whileLists.add(whileListValue);
-		}
+		final List<String> whileLists = Arrays.asList(whileListValue.split(","));
 
-		container.addContainerFilter(new Filter() {
+		Filter filter = new Filter() {
 
 			private static final long serialVersionUID = 2884978605273521704L;
 
@@ -717,7 +723,6 @@ public class FilteredHistoryTable extends CustomComponent {
 				Property<String> itemProperty = item.getItemProperty(columnID);
 				if (itemProperty == null)
 					return false;
-
 				Object valObj = itemProperty.getValue();
 				String val = valObj == null ? ""
 						: valObj.toString().toLowerCase();
@@ -728,8 +733,19 @@ public class FilteredHistoryTable extends CustomComponent {
 				}
 				return false;
 			}
-		});
+		};
+		addContainerFilter(columnID, filter);
 
+	}
+
+	private void removeContainerFilter(final String columnID) {
+		container.removeContainerFilters(columnID);
+		filtersCache.remove(columnID);
+	}
+
+	private void addContainerFilter(final String columnID, Filter filter) {
+		filtersCache.put(columnID, filter);
+		container.addContainerFilter(filter);
 	}
 
 	public AbstractLayout getFiltersLayout() {
