@@ -31,6 +31,7 @@ import org.quartz.Trigger.CompletedExecutionInstruction;
 import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
 import org.quartz.TriggerListener;
+import org.quartz.listeners.JobListenerSupport;
 import org.quartz.spi.ClassLoadHelper;
 import org.quartz.spi.SchedulerPlugin;
 import org.quartz.utils.DBConnectionManager;
@@ -306,6 +307,33 @@ extends JdbcSchedulerHistoryPlugin implements SchedulerPlugin, Serializable, Rem
         // Register listeners
         scheduler.getListenerManager().addTriggerListener(new HistoryTriggerListener());
         scheduler.getListenerManager().addSchedulerListener(new HistorySchedulerListener());
+        scheduler.getListenerManager().addJobListener(new JobListenerSupport() {
+			
+			@Override
+			public String getName() {
+				return "ExtendedHistoryJobListener";
+			}
+
+			@Override
+			public void jobExecutionVetoed(JobExecutionContext context) {
+				Object[] params = new Object[]{
+	                    localIp,
+	                    localHost,
+	                    schedulerNameAndId,
+	                    "SchedulerListener",
+	                    "triggerVetoed",
+	                    new Date(),
+	                    context.getTrigger().getKey().toString(),
+	                    null,
+	                    null,
+	                    null,
+	                    null
+	            };
+	            insertHistory(insertSql, params);
+			}
+			
+			
+		});
 
         // Store this plugin instance into scheduler context map
         if (schedulerContextKey == null)
