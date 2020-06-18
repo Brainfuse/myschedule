@@ -320,15 +320,15 @@ extends JdbcSchedulerHistoryPlugin implements SchedulerPlugin, Serializable, Rem
 	                    localIp,
 	                    localHost,
 	                    schedulerNameAndId,
-	                    "SchedulerListener",
-	                    "triggerVetoed",
+	                    "TriggerListener",
+	                    "triggerFired",
 	                    new Date(),
 	                    context.getTrigger().getKey().toString(),
-	                    null,
-	                    null,
-	                    null,
+	                    context.getTrigger().getJobKey().toString(),
+	                    context.getFireInstanceId(),
+	                    context.getFireTime(),
 	                    null
-	            };
+				};
 	            insertHistory(insertSql, params);
 			}
 			
