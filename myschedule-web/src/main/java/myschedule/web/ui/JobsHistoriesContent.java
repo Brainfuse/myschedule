@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.PopupView;
 import com.vaadin.ui.VerticalLayout;
 
 import myschedule.web.MySchedule;
@@ -30,17 +31,20 @@ public class JobsHistoriesContent extends VerticalLayout {
     public JobsHistoriesContent(MyScheduleUi myScheduleUi, String schedulerSettingsName) throws RemoteException {
         this.myScheduleUi = myScheduleUi;
         this.schedulerSettingsName = schedulerSettingsName;
-        initToolbar();
+        
         filteredTable = new FilteredHistoryTable(schedulerSettingsName);
+        initToolbar();
         addComponent(filteredTable);
     }
 
     private void initToolbar() {
         toolbar = new HorizontalLayout();
         addComponent(toolbar);
-
+        PopupView filtersButton = new PopupView("Filters", filteredTable.getFiltersLayout());
+		toolbar.addComponent(filtersButton);
         toolbar.addComponent(createRefreshButton());
     }
+   
 
     private Button createRefreshButton() {
         Button button = new Button("Refresh");

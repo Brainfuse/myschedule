@@ -44,7 +44,7 @@ import myschedule.quartz.extra.SchedulerTemplate;
 import myschedule.web.MySchedule;
 
 public class FilteredHistoryTable extends CustomComponent {
-	private class CheckboxGroup extends CustomComponent {
+	class CheckboxGroup extends CustomComponent {
 
 		private static final long serialVersionUID = -6762371787075654521L;
 
@@ -312,7 +312,7 @@ public class FilteredHistoryTable extends CustomComponent {
 	}
 
 	// this class builds the filtering checkbox selections
-	private static class HistoryRecordListHolder {
+	static class HistoryRecordListHolder {
 
 		private List<HistoryRecordBean> actualBeans;
 
@@ -409,28 +409,28 @@ public class FilteredHistoryTable extends CustomComponent {
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(
 			"yyyy-MM-dd HH:mm:ss");
 
-	private static final String EVENT_NAME = "Event Name";
+	static final String EVENT_NAME = "Event Name";
 
-	private static final String EVENT_TIME = "Event Time";
+	static final String EVENT_TIME = "Event Time";
 
-	private static final String EVENT_TYPE = "Event Type";
+	static final String EVENT_TYPE = "Event Type";
 
-	private static final String HOST_IP_NAME = "Host IP/Name";
+	static final String HOST_IP_NAME = "Host IP/Name";
 
-	private static final String INFO_1 = "Info 1";
+	static final String INFO_1 = "Info 1";
 
-	private static final String INFO_2 = "Info 2";
+	static final String INFO_2 = "Info 2";
 
-	private static final String INFO_3 = "Info 3";
+	static final String INFO_3 = "Info 3";
 
-	private static final String INFO_4 = "Info 4";
+	static final String INFO_4 = "Info 4";
 
-	private static final String INFO_5 = "Info 5";
+	static final String INFO_5 = "Info 5";
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(FilteredHistoryTable.class);
 
-	private static final String SCHEDULER_NAME = "Scheduler Name";
+	static final String SCHEDULER_NAME = "Scheduler Name";
 
 	private static final long serialVersionUID = 6894801051461901373L;
 
@@ -481,6 +481,7 @@ public class FilteredHistoryTable extends CustomComponent {
 		table = new Table();
 
 		try {
+			
 			HorizontalSplitPanel rootComponent = new HorizontalSplitPanel();
 			setCompositionRoot(rootComponent);
 			rootComponent.setSplitPosition(250, Unit.PIXELS);
@@ -551,7 +552,7 @@ public class FilteredHistoryTable extends CustomComponent {
 
 			table.setColumnWidth(INFO_5, 600);
 
-			rootComponent.addComponent(filtersLayout);
+//			rootComponent.addComponent(filtersLayout);
 			rootComponent.addComponent(table);
 
 			logger.info("finished init history table");
@@ -561,7 +562,7 @@ public class FilteredHistoryTable extends CustomComponent {
 		}
 	}
 	
-	private HistoryRecordListHolder getCachedTableData()
+	HistoryRecordListHolder getCachedTableData()
 			throws NoPluginException, RemoteException {
 
 		if (cachedTableData == null) {
@@ -638,7 +639,7 @@ public class FilteredHistoryTable extends CustomComponent {
 		try {
 			this.cachedTableData = null;
 			loadDataIntoContainer();
-			container.removeAllContainerFilters();
+//			container.removeAllContainerFilters();
 		} catch (NoPluginException e) {
 			Notification.show("WARNING", e.getMessage(),
 					Notification.Type.WARNING_MESSAGE);
@@ -729,5 +730,9 @@ public class FilteredHistoryTable extends CustomComponent {
 			}
 		});
 
+	}
+
+	public AbstractLayout getFiltersLayout() {
+		return filtersLayout;
 	}
 }
