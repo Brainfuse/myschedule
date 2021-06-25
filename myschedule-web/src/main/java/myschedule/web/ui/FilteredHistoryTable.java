@@ -29,8 +29,6 @@ import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.ui.AbstractLayout;
 import com.vaadin.ui.Accordion;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.HorizontalLayout;
@@ -53,6 +51,7 @@ public class FilteredHistoryTable extends CustomComponent {
 		private final Set<String> boxesNames;
 		private List<CheckBox> checkboxes;
 		private final String columnID;
+		private boolean ignoreTriggers;
 
 		public CheckboxGroup(final String groupName,
 				final Set<String> boxesNames) {
@@ -82,34 +81,10 @@ public class FilteredHistoryTable extends CustomComponent {
 			}
 
 			Button selectAllBtn = new Button("All");
-			selectAllBtn.addClickListener(new ClickListener() {
-
-				private static final long serialVersionUID = -6815756828312138720L;
-
-				@Override
-				public void buttonClick(ClickEvent event) {
-					for (CheckBox cb : checkboxes) {
-						cb.setValue(true);
-
-					}
-					updateFilters(columnID, "");
-				}
-			});
+			selectAllBtn.addClickListener(event -> selectAllOrNone(true));
 
 			Button selectNoneBtn = new Button("None");
-			selectNoneBtn.addClickListener(new ClickListener() {
-
-				private static final long serialVersionUID = -1884288624398676463L;
-
-				@Override
-				public void buttonClick(ClickEvent event) {
-					for (CheckBox cb : checkboxes) {
-						cb.setValue(false);
-
-					}
-					updateFilters(columnID, null);
-				}
-			});
+			selectNoneBtn.addClickListener(event -> selectAllOrNone(false));
 
 			layout.addComponent(
 					new HorizontalLayout(selectAllBtn, selectNoneBtn));
@@ -117,33 +92,44 @@ public class FilteredHistoryTable extends CustomComponent {
 			for (CheckBox checkbox : checkboxes) {
 				checkbox.setValue(true);
 				layout.addComponent(checkbox);
-				checkbox.addValueChangeListener(new ValueChangeListener() {
-
-					private static final long serialVersionUID = 1279363297795264292L;
-
-					@Override
-					public void valueChange(ValueChangeEvent event) {
-
-						List<String> checked = new ArrayList<String>();
-						for (CheckBox b : checkboxes) {
-							if (b.getValue()) {
-								checked.add(b.getCaption());
-							}
-						}
-
-						if (checked.isEmpty()) {
-							updateFilters(columnID, null);
-						} else {
-							final String whiteListValues = String.join(",",
-									checked);
-							updateFilters(columnID, whiteListValues);
-						}
-
+				checkbox.addValueChangeListener(event -> {
+					if(ignoreTriggers) {
+						// Used for the None and All buttons to avoid multiple triggers.
+						return;
 					}
+					List<String> checked = new ArrayList<String>();
+					for (CheckBox b : checkboxes) {
+						if (b.getValue()) {
+							checked.add(b.getCaption());
+						}
+					}
+
+					if (checked.isEmpty()) {
+						updateFilters(columnID, null);
+					} else {
+						final String whiteListValues = String.join(",",
+								checked);
+						updateFilters(columnID, whiteListValues);
+					}
+
 				});
 			}
 			return this;
 
+		}
+
+		private void selectAllOrNone(boolean value) {
+			try {
+				ignoreTriggers = true;
+
+				for (CheckBox cb : checkboxes) {
+					cb.setValue(value);
+
+				}
+				updateFilters(columnID, "");
+			} finally {
+				ignoreTriggers = false;
+			}
 		}
 
 	}

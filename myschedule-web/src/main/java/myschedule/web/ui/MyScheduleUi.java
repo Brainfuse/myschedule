@@ -1,8 +1,15 @@
 package myschedule.web.ui;
 
+import com.vaadin.annotations.Widgetset;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.*;
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.UI;
+import com.vaadin.ui.VerticalLayout;
+
 import myschedule.web.MySchedule;
 
 /**
@@ -11,6 +18,7 @@ import myschedule.web.MySchedule;
  * components of this application would only consist of a bread crumb like navigation bar and a user screen that
  * can be changed/loaded depending on user's action. The default user screen is the DashboardScreen view.
  */
+@Widgetset("myschedule.web.ui.MyScheduleUiWidgetSet")
 public class MyScheduleUi extends UI {
     private static final long serialVersionUID = 1L;
     private VerticalLayout content;

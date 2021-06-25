@@ -7,10 +7,11 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vaadin.aceeditor.AceEditor;
-import org.vaadin.aceeditor.gwt.ace.AceMode;
-import org.vaadin.aceeditor.gwt.ace.AceTheme;
+import org.vaadin.aceeditor.AceMode;
+import org.vaadin.aceeditor.AceTheme;
 
 import com.vaadin.data.Property;
+import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
@@ -47,6 +48,8 @@ public class ScriptConsoleWindow extends AbstractWindow {
 
         initEditorControls();
         initTemplatesList();
+        initEditor();
+        
     }
 
     /**
@@ -61,8 +64,10 @@ public class ScriptConsoleWindow extends AbstractWindow {
 
         scriptConsoleContent.setSizeFull();
         consoleContent = new VerticalLayout();
+        consoleContent.setSizeFull();
         templatesContent = new VerticalLayout();
         scriptConsoleContent.addComponent(consoleContent);
+        
         scriptConsoleContent.setExpandRatio(consoleContent, 5.0f);
         scriptConsoleContent.addComponent(templatesContent);
         scriptConsoleContent.setExpandRatio(templatesContent, 1.0f);
@@ -91,11 +96,21 @@ public class ScriptConsoleWindow extends AbstractWindow {
     }
 
     protected void initEditor() {
+    	Label label = new Label("<style>.AceEditorWidget {\r\n"
+    			+ "height: 400px;\r\n"
+    			+ "}");
+    	label.setContentMode(ContentMode.HTML);
+    	consoleContent.addComponent(label);
+    	
         editor = new AceEditor();// new TextArea();
         editor.setMode(AceMode.javascript);
         editor.setTheme(AceTheme.eclipse);
+        editor.setHeight(400, Unit.PIXELS);
         editor.setSizeFull();
-//        editor.setUseWorker(true);
+        editor.setUseWorker(false);
+        editor.setThemePath("/quartz/static/ace");
+        editor.setModePath("/quartz/static/ace");
+        editor.setWorkerPath("/quartz/static/ace");   
         consoleContent.addComponent(editor);
     }
 
