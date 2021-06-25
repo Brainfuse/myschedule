@@ -20,7 +20,7 @@
     information and instructions.
     -->
     <!-- <set-configuration-property name="devModeRedirectEnabled" value="true" /> -->
-
+	<inherits name="com.google.gwt.core.Core"/>
 
 
     <inherits name="org.vaadin.aceeditor.AceEditorWidgetSet" />
