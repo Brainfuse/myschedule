@@ -6,6 +6,9 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vaadin.aceeditor.AceEditor;
+import org.vaadin.aceeditor.gwt.ace.AceMode;
+import org.vaadin.aceeditor.gwt.ace.AceTheme;
 
 import com.vaadin.data.Property;
 import com.vaadin.ui.Button;
@@ -13,7 +16,6 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.ListSelect;
-import com.vaadin.ui.TextArea;
 import com.vaadin.ui.VerticalLayout;
 
 import myschedule.quartz.extra.SchedulerTemplate;
@@ -24,7 +26,7 @@ import myschedule.web.SchedulerSettings;
 /**
  * A popup UI window to display scripting console text editor to manipulate a scheduler.
  */
-public class ScriptConsoleWindow extends EditorWindow {
+public class ScriptConsoleWindow extends AbstractWindow {
     private static final Logger LOGGER = LoggerFactory.getLogger(ScriptConsoleWindow.class);
     private static final long serialVersionUID = 1L;
     private String schedulerSettingsName;
@@ -34,6 +36,7 @@ public class ScriptConsoleWindow extends EditorWindow {
     private List<String> scriptEngineNames;
     private String defaultScriptEngineName;
     private ListSelect templatesList;
+    private AceEditor editor;
 
     public ScriptConsoleWindow(MyScheduleUi myScheduleUi, String schedulerSettingsName) {
         this.myScheduleUi = myScheduleUi;
@@ -87,11 +90,12 @@ public class ScriptConsoleWindow extends EditorWindow {
         });
     }
 
-    @Override
     protected void initEditor() {
-        editor = new TextArea();
+        editor = new AceEditor();// new TextArea();
+        editor.setMode(AceMode.javascript);
+        editor.setTheme(AceTheme.eclipse);
         editor.setSizeFull();
-        editor.setRows(25);
+//        editor.setUseWorker(true);
         consoleContent.addComponent(editor);
     }
 

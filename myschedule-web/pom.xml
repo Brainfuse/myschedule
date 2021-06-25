@@ -51,6 +51,13 @@
 			<version>2.5</version>
 			<scope>provided</scope>
 		</dependency>		
+		<!-- https://mvnrepository.com/artifact/org.vaadin/aceeditor -->
+		<dependency>
+		    <groupId>org.vaadin</groupId>
+		    <artifactId>aceeditor</artifactId>
+		    <version>0.3.1</version>
+		</dependency>
+				
 
 		<dependency>
 			<groupId>org.hamcrest</groupId>
