@@ -38,6 +38,15 @@
             <artifactId>vaadin-client</artifactId>
             <scope>provided</scope>
         </dependency>
+         
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-client-compiler</artifactId>
+            <version>${vaadin.version}</version>
+            <!-- TODO this should have scope provided once http://dev.vaadin.com/ticket/14788 
+                is resolved -->
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-themes</artifactId>
@@ -106,7 +115,6 @@
                             <execution>
                                 <goals>
                                     <goal>compile</goal>
-                                    <goal>compile-theme</goal>
                                 </goals>
                             </execution>
                         </executions>
