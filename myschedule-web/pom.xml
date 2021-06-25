@@ -104,7 +104,7 @@
                             <module>myschedule.web.ui.MyScheduleUiWidgetSet</module>
                             <extraJvmArgs>-Xmx512M -Xss1024k</extraJvmArgs>
                             <warSourceDirectory>${vaadin.resource.directory}</warSourceDirectory>
-                            <webappDirectory>${vaadin.resource.directory}/WEB-INF/classes</webappDirectory>
+                            <webappDirectory>${vaadin.resource.directory}/WEB-INF/classes/VAADIN/widgetsets</webappDirectory>
                             <draftCompile>false</draftCompile>
                             <compileReport>false</compileReport>
                             <style>OBF</style>
