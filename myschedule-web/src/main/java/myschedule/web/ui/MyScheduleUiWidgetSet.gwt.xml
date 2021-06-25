@@ -25,7 +25,5 @@
 
     <inherits name="org.vaadin.aceeditor.AceEditorWidgetSet" />
 
-    <inherits name="org.vaadin.mockapp.MockAppWidgetset" />
-
     <inherits name="com.vaadin.DefaultWidgetSet" />
 </module>
