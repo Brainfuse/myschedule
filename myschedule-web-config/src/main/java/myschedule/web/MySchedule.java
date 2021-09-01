@@ -1,18 +1,26 @@
 package myschedule.web;
 
-import myschedule.quartz.extra.SchedulerTemplate;
-import myschedule.quartz.extra.util.ClasspathURLStreamHandler;
-import myschedule.quartz.extra.util.Props;
+import static java.util.stream.Collectors.toMap;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.quartz.impl.RemoteScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.*;
+import myschedule.quartz.extra.SchedulerTemplate;
+import myschedule.quartz.extra.util.ClasspathURLStreamHandler;
+import myschedule.quartz.extra.util.Props;
 
 /**
  * This is the central manager of the MySchedule application. There is only one instance of MySchedule application, 
@@ -29,8 +37,20 @@ public class MySchedule extends AbstractService {
     private TemplatesStore schedulerTemplatesStore;
     private TemplatesStore scriptTemplatesStore;
     private TemplatesStore xmlJobLoaderTemplatesStore;
-    private String myScheduleVersion;
-    private String quartzVersion;
+    private Map<String,String> versions;
+	private Map<String,String> versionsLoc = new LinkedHashMap() {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -7341070427069943665L;
+
+		{
+			put("bizobjects", "META-INF/maven/com.brainfuse.server/bizobjects/pom.properties");
+			put("jobs", "META-INF/maven/com.brainfuse.quartz/QuartzScheduler/pom.properties");
+			put("myScheduler", "META-INF/maven/myschedule/myschedule-web-config/pom.properties");
+			put("quartz", "META-INF/maven/org.quartz-scheduler/quartz/pom.properties");
+		}
+	};
 
 	private MySchedule() {
 	}
@@ -361,22 +381,21 @@ public class MySchedule extends AbstractService {
     public MyScheduleSettings getMyScheduleSettings() {
         return myScheduleSettings;
     }
-
-    public String getMyScheduleVersion() {
-        if (myScheduleVersion == null) {
-            String res = "META-INF/maven/myschedule/myschedule-web-config/pom.properties";
-            myScheduleVersion = readPropertyValueFromResource(res, "version");
+    
+    public Map<String, String> getVersions() {
+        if (versions == null) {
+			versions = versionsLoc.entrySet().stream()
+					.map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(),
+							getVersion(entry.getValue())))
+					.collect(toMap(e -> e.getKey(),
+							e -> e.getValue(),(e,x)->e, LinkedHashMap::new));
         }
-        return myScheduleVersion;
+        return versions;
     }
 
-    public String getQuartzVersion() {
-        if (quartzVersion == null) {
-            String res = "META-INF/maven/org.quartz-scheduler/quartz/pom.properties";
-            quartzVersion = readPropertyValueFromResource(res, "version");
-        }
-        return quartzVersion;
-    }
+	private String getVersion(String res) {
+		return readPropertyValueFromResource(res, "version");
+	}
 
     /** Return key found from resource properties file, or empty string. */
     private String readPropertyValueFromResource(String resourceName, String key) {
