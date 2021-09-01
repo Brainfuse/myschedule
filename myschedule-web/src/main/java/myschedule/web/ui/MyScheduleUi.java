@@ -1,5 +1,7 @@
 package myschedule.web.ui;
 
+import static java.util.stream.Collectors.joining;
+
 import com.vaadin.annotations.Widgetset;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.shared.ui.label.ContentMode;
@@ -64,19 +66,14 @@ public class MyScheduleUi extends UI {
         return result;
     }
 
-    private HorizontalLayout creatFooter() {
-        String myScheduleAppName = "myschedule";
-        MySchedule mySchedule = MySchedule.getInstance();
-        String version = mySchedule.getMyScheduleVersion();
-        if (!version.equals(""))
-            myScheduleAppName += "-" + version;
+	private HorizontalLayout creatFooter() {
+		MySchedule mySchedule = MySchedule.getInstance();
+		String versions = mySchedule.getVersions().entrySet().stream()
+				.map(e -> e.getKey() + "-" + e.getValue())
+				.collect(joining(", "));
+        
 
-        String quartzAppName = "quartz";
-        version = mySchedule.getQuartzVersion();
-        if (!version.equals(""))
-            quartzAppName += "-" + version;
-
-        String poweredByText = "Powered by " + myScheduleAppName + " with " + quartzAppName;
+        String poweredByText = "Powered by " + versions;
         Label poweredByLabel = new Label(poweredByText, ContentMode.PREFORMATTED);
 
         HorizontalLayout result = new HorizontalLayout();
