@@ -33,12 +33,15 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.TriggerKey;
 import org.quartz.core.QuartzScheduler;
+import org.quartz.core.QuartzSchedulerResources;
 import org.quartz.impl.jdbcjobstore.FiredTriggerRecord;
 import org.quartz.impl.jdbcjobstore.JobStoreSupport;
 import org.quartz.impl.jdbcjobstore.Util;
 import org.quartz.utils.DBConnectionManager;
 
 import myschedule.quartz.extra.QuartzRuntimeException;
+import myschedule.quartz.extra.SchedulerTemplate;
+import myschedule.web.MySchedule;
 
 /**
  * Basic from https://stackoverflow.com/a/17242375/9519287
@@ -173,7 +176,7 @@ class QuartzClusterJobStatusService
 		this.scheduler = quartzScheduler;
 	}
 
-	List<JobExecutionContextResult> getCurrentlyRunningJobs() {
+	List<JobExecutionContextResult> getCurrentlyRunningJobs() throws QuartzRuntimeException {
 		if (!(this.scheduler instanceof QuartzScheduler))
 			try {
 				return adapt(this.scheduler.getCurrentlyExecutingJobs());
@@ -181,19 +184,23 @@ class QuartzClusterJobStatusService
 				throw new QuartzRuntimeException(e1);
 			}
 
-		QuartzScheduler quartzScheduler = (QuartzScheduler) this.scheduler;
-		JobStoreSupport js = getJobStoreSupport(quartzScheduler);
-		if (!js.isClustered()) {
-			final List<JobExecutionContext> currentlyExecutingJobs = quartzScheduler
-					.getCurrentlyExecutingJobs();
-			return adapt(currentlyExecutingJobs);
+		JobStoreSupport js = getJobStoreSupport(this.scheduler);
+		
+		try {
+			if (!js.isClustered()) {
+				final List<JobExecutionContext> currentlyExecutingJobs = this.scheduler
+						.getCurrentlyExecutingJobs();
+				return adapt(currentlyExecutingJobs);
+			}
+		} catch (SchedulerException e1) {
+			throw new QuartzRuntimeException(e1);
 		}
 		List<JobExecutionContextResult> resultList = new ArrayList<>();
 		try (Connection conn = DBConnectionManager.getInstance()
 				.getConnection(js.getDataSource());
 				PreparedStatement stmt = conn.prepareStatement(
 						Util.rtp(SELECT_FIRED_TRIGGERS, js.getTablePrefix(),
-								quartzScheduler.getSchedulerName()))) {
+								scheduler.getSchedulerName()))) {
 
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
@@ -220,7 +227,7 @@ class QuartzClusterJobStatusService
 				resultList.add(result);
 			}
 			return resultList;
-    	} catch (SQLException e) {
+    	} catch (SQLException | SchedulerException e) {
     		throw new QuartzRuntimeException(e);
     	}
     }
@@ -230,19 +237,29 @@ class QuartzClusterJobStatusService
 		return currentlyExecutingJobs.stream()
 				.map(JobExecutionContextResult.Adapter::new).collect(toList());
 	}
-    
-    JobStoreSupport getJobStoreSupport(QuartzScheduler sched) {
-    	final Field[] declaredFields = sched.getClass().getDeclaredFields();
+    public static JobStoreSupport getJobStoreSuppot(String schedulerSettingsName) {
+    	MySchedule mySchedule = MySchedule.getInstance();
+		SchedulerTemplate scheduler = mySchedule
+				.getScheduler(schedulerSettingsName);
+		return getJobStoreSupport(scheduler.getScheduler());
+    }
+    public static JobStoreSupport getJobStoreSupport(Scheduler stdScheduler) {
+    	QuartzScheduler sched = (QuartzScheduler) getFieldValue(stdScheduler, "sched");
+		return (JobStoreSupport) ((QuartzSchedulerResources) getFieldValue(sched, "resources")).getJobStore();
+    }
+
+	private static Object getFieldValue(final Object obj, final String name) {
+		final Field[] declaredFields = obj.getClass().getDeclaredFields();
     	for(Field f: declaredFields) {
-    		if(f.getName().equals("resources")) {
+			if(f.getName().equals(name)) {
     			f.setAccessible(true);
     			try {
-					return (JobStoreSupport) f.get(sched);
+					return f.get(obj);
 				} catch (IllegalAccessException e) {
 					throw new QuartzRuntimeException(e);
 				}
     		}
     	}
     	throw new IllegalArgumentException("no resources field found in QuartzScheduler.class");
-    }
+	}
 }
