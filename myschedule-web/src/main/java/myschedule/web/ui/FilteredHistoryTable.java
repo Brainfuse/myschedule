@@ -2,7 +2,6 @@ package myschedule.web.ui;
 
 import java.rmi.RemoteException;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,9 +15,9 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.data.Container;
 import com.vaadin.data.Container.Filter;
 import com.vaadin.data.Item;
-import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.util.filter.Between;
 import com.vaadin.data.util.filter.Compare;
 import com.vaadin.data.util.filter.Or;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
@@ -167,45 +166,7 @@ public class FilteredHistoryTable extends CustomComponent {
 							? inputEnd : inputStart;
 					logger.debug("filter dates {} ~ {}", filterStart,
 							filterEnd);
-					addContainerFilter(columnID, new Filter() {
-
-						private static final long serialVersionUID = 1691912829845711349L;
-
-						@Override
-						public boolean appliesToProperty(Object propertyId) {
-							return columnID.equals(propertyId);
-						}
-
-						@Override
-						public boolean passesFilter(Object itemId, Item item)
-								throws UnsupportedOperationException {
-
-							@SuppressWarnings("rawtypes")
-							Property itemProperty = item
-									.getItemProperty(columnID);
-
-							if (itemProperty == null)
-								return false;
-							if (itemProperty.getValue() == null)
-								return false;
-							String s = itemProperty.getValue().toString();
-
-							try {
-								Date dataDate = DATE_FORMAT.parse(s);
-								if (dataDate.before(filterEnd)
-										&& dataDate.after(filterStart)) {
-									return true;
-								} else {
-									return false;
-								}
-							} catch (ParseException e) {
-								logger.error("", e);
-								return true;
-							}
-
-						}
-
-					});
+					addContainerFilter(columnID, new Between(EVENT_TIME, filterStart, filterEnd));
 
 				}
 			};
@@ -312,6 +273,7 @@ public class FilteredHistoryTable extends CustomComponent {
 	public FilteredHistoryTable(String schedulerSettingsName) throws RemoteException {
 		this.schedulerSettingsName = schedulerSettingsName;
 		table = new Table();
+		table.setSizeFull();
 
 		try {
 			
@@ -327,6 +289,7 @@ public class FilteredHistoryTable extends CustomComponent {
 			this.container = filterImpl.getContainer();
 			// setup the contents for filter panel
 			filtersLayout = new VerticalLayout();
+			filtersLayout.setSizeFull();
 			HistoryRecordListHolder holder = filterImpl.getCachedFiltersData();
 			Accordion accordion = new Accordion();
 			accordion.addTab(
