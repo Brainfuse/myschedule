@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.PopupView;
-import com.vaadin.ui.VerticalLayout;
 
 import myschedule.web.MySchedule;
 
@@ -19,7 +18,7 @@ import myschedule.web.MySchedule;
  * User: Zemian Deng
  * Date: 6/1/13
  */
-public class JobsHistoriesContent extends VerticalLayout {
+public class JobsHistoriesContent extends FullSizeVerticalLayout {
     private static final Logger LOGGER = LoggerFactory.getLogger(JobsHistoriesContent.class);
     MySchedule mySchedule = MySchedule.getInstance();
     MyScheduleUi myScheduleUi;
@@ -32,10 +31,11 @@ public class JobsHistoriesContent extends VerticalLayout {
     public JobsHistoriesContent(MyScheduleUi myScheduleUi, String schedulerSettingsName) throws RemoteException {
         this.myScheduleUi = myScheduleUi;
         this.schedulerSettingsName = schedulerSettingsName;
+        setId("jobHistoryContent");
         
         filteredTable = new FilteredHistoryTable(schedulerSettingsName);
         initToolbar();
-        addComponent(filteredTable);
+        addContent(filteredTable);
     }
 
     private void initToolbar() {

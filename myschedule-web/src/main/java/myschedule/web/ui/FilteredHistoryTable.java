@@ -278,6 +278,7 @@ public class FilteredHistoryTable extends CustomComponent {
 		try {
 			
 //			HorizontalLayout rootComponent = new HorizontalLayout();
+			setSizeFull();
 			setCompositionRoot(table);
 //			rootComponent.setSplitPosition(250, Unit.PIXELS);
 //			rootComponent.setHeight(600, Unit.PIXELS);

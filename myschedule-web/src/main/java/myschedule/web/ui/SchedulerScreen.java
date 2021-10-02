@@ -22,6 +22,7 @@ public class SchedulerScreen extends VerticalLayout {
     public SchedulerScreen(MyScheduleUi myScheduleUi, String schedulerSettingsName) {
         this.myScheduleUi = myScheduleUi;
         this.schedulerSettingsName = schedulerSettingsName;
+        setSizeFull();
         initContent();
     }
 
@@ -32,17 +33,24 @@ public class SchedulerScreen extends VerticalLayout {
 
     class SchedulerContent extends VerticalLayout {
         TabSheet tabSheet;
-        VerticalLayout jobsWithTriggersContent = new VerticalLayout();
-        VerticalLayout jobsWithoutTriggersContent = new VerticalLayout();
-        VerticalLayout jobsRunningContent = new VerticalLayout();
-        VerticalLayout calendarsContent = new VerticalLayout();
-        VerticalLayout schedulerStatusContent = new VerticalLayout();
-        VerticalLayout xmlJobLoaderContent = new VerticalLayout();
-        VerticalLayout jobsHistoriesContent = new VerticalLayout();
-        VerticalLayout scriptConsoleContent = new VerticalLayout();
+
+		private VerticalLayout newVerticalLayout() {
+			final VerticalLayout verticalLayout = new VerticalLayout();
+			verticalLayout.setSizeFull();
+			return verticalLayout;
+		}
+		VerticalLayout jobsWithTriggersContent = newVerticalLayout();
+        VerticalLayout jobsWithoutTriggersContent = newVerticalLayout();
+        VerticalLayout jobsRunningContent = newVerticalLayout();
+        VerticalLayout calendarsContent = newVerticalLayout();
+        VerticalLayout schedulerStatusContent = newVerticalLayout();
+        VerticalLayout xmlJobLoaderContent = newVerticalLayout();
+        VerticalLayout jobsHistoriesContent = newVerticalLayout();
+        VerticalLayout scriptConsoleContent = newVerticalLayout();
 
         public SchedulerContent() {
             tabSheet = new TabSheet();
+            setSizeFull();
             addComponent(tabSheet);
 
             tabSheet.addTab(jobsWithTriggersContent, "Jobs with Triggers");
@@ -53,6 +61,7 @@ public class SchedulerScreen extends VerticalLayout {
             tabSheet.addTab(xmlJobLoaderContent, "Xml Job Loader");
             tabSheet.addTab(jobsHistoriesContent, "Job Histories");
             tabSheet.addTab(scriptConsoleContent, "Script Console");
+            tabSheet.setSizeFull();
 
             tabSheet.addSelectedTabChangeListener(new TabSheet.SelectedTabChangeListener() {
                 @Override

@@ -18,7 +18,6 @@ import com.vaadin.event.ItemClickEvent;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Table;
-import com.vaadin.ui.VerticalLayout;
 
 import myschedule.quartz.extra.SchedulerTemplate;
 import myschedule.web.MySchedule;
@@ -33,7 +32,7 @@ import myschedule.web.ui.QuartzClusterJobStatusService.JobExecutionContextResult
  * User: Zemian Deng
  * Date: 6/1/13
  */
-public class JobsRunningContent extends VerticalLayout {
+public class JobsRunningContent extends FullSizeVerticalLayout {
     private static final Logger LOGGER = LoggerFactory.getLogger(JobsRunningContent.class);
     MySchedule mySchedule = MySchedule.getInstance();
     MyScheduleUi myScheduleUi;
@@ -124,7 +123,7 @@ public class JobsRunningContent extends VerticalLayout {
 
     private void initJobsTable() {
         table = new Table();
-        addComponent(table);
+        addContent(table);
 
         table.setSizeFull();
         table.setImmediate(true);
