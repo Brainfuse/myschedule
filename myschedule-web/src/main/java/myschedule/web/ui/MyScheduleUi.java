@@ -35,10 +35,11 @@ public class MyScheduleUi extends UI {
 
         // Create components
         content = new VerticalLayout();
+        content.setSizeFull();
         breadcrumbBar = new BreadcrumbBar(this);
         currentScreen = new DashboardScreen(this);
 
-        HorizontalLayout headerContent = createHeader();
+//        HorizontalLayout headerContent = createHeader();
         HorizontalLayout footerContent = creatFooter();
 
         // We needed a wrapper to remain in place so when refreshing currentScreen, the footer won't get messed up.
@@ -49,12 +50,16 @@ public class MyScheduleUi extends UI {
         // Setup content
         content.setImmediate(true);
         content.setMargin(true);
-        content.addComponent(headerContent);
-        content.setComponentAlignment(headerContent, Alignment.MIDDLE_CENTER);
+//        content.addComponent(headerContent);
+//        content.setComponentAlignment(headerContent, Alignment.TOP_CENTER);
         content.addComponent(breadcrumbBar);
+        content.setExpandRatio(breadcrumbBar, 0);
         content.addComponent(currentScreenWrapper);
+        content.setComponentAlignment(currentScreenWrapper, Alignment.MIDDLE_CENTER);
+        content.setExpandRatio(currentScreenWrapper, 1);
         content.addComponent(footerContent);
         content.setComponentAlignment(footerContent, Alignment.BOTTOM_RIGHT);
+        content.setExpandRatio(footerContent, 0);
         setContent(content);
     }
 

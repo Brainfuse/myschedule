@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.quartz.JobDetail;
-import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
 import org.quartz.Trigger;
 import org.quartz.TriggerKey;
@@ -19,10 +18,11 @@ import com.vaadin.event.ItemClickEvent;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Table;
-import com.vaadin.ui.VerticalLayout;
 
 import myschedule.quartz.extra.SchedulerTemplate;
 import myschedule.web.MySchedule;
+import myschedule.web.ui.QuartzClusterJobStatusService.FiredTrigger;
+import myschedule.web.ui.QuartzClusterJobStatusService.JobExecutionContextResult;
 
 /**s
  * JobsRunningContent provides a table view for all the current running jobs in scheduler. Note that typical job in
@@ -32,7 +32,7 @@ import myschedule.web.MySchedule;
  * User: Zemian Deng
  * Date: 6/1/13
  */
-public class JobsRunningContent extends VerticalLayout {
+public class JobsRunningContent extends FullSizeVerticalLayout {
     private static final Logger LOGGER = LoggerFactory.getLogger(JobsRunningContent.class);
     MySchedule mySchedule = MySchedule.getInstance();
     MyScheduleUi myScheduleUi;
@@ -123,7 +123,7 @@ public class JobsRunningContent extends VerticalLayout {
 
     private void initJobsTable() {
         table = new Table();
-        addComponent(table);
+        addContent(table);
 
         table.setSizeFull();
         table.setImmediate(true);
@@ -163,13 +163,15 @@ public class JobsRunningContent extends VerticalLayout {
         table.removeAllItems();
         // Fill table data
         LOGGER.debug("Loading current running jobs from scheduler {}", schedulerSettingsName);
-        MySchedule mySchedule = MySchedule.getInstance();
-        SchedulerTemplate scheduler = mySchedule.getScheduler(schedulerSettingsName);
-        List<JobExecutionContext> jobs = scheduler.getCurrentlyExecutingJobs();
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        for (JobExecutionContext job : jobs) {
-            Trigger trigger = job.getTrigger();
-            TriggerKey triggerKey = trigger.getKey();
+		MySchedule mySchedule = MySchedule.getInstance();
+		SchedulerTemplate scheduler = mySchedule
+				.getScheduler(schedulerSettingsName);
+		List<JobExecutionContextResult> jobs = new QuartzClusterJobStatusService(
+				scheduler.getScheduler()).getCurrentlyRunningJobs();
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        for (JobExecutionContextResult job : jobs) {
+            FiredTrigger trigger = job.getTrigger();
+            TriggerKey triggerKey = trigger.getTriggerKey();
             JobKey jobKey = trigger.getJobKey();
             JobDetail jobDetail = scheduler.getJobDetail(jobKey);
             Date nextFireTime = trigger.getNextFireTime();
@@ -185,7 +187,7 @@ public class JobsRunningContent extends VerticalLayout {
             table.addItem(row, triggerKeyName);
         }
     }
-
+    
     private void showJobsWithTriggersWindow() {
         TriggerKey triggerKey = getSelectedTriggerKey();
         JobsWithTriggersWindow window = new JobsWithTriggersWindow(myScheduleUi, schedulerSettingsName, triggerKey);
