@@ -1,20 +1,23 @@
 package myschedule.web.ui;
 
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.vaadin.dialogs.ConfirmDialog;
+
 import com.vaadin.data.Property;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+
 import myschedule.quartz.extra.SchedulerTemplate;
 import myschedule.web.MySchedule;
 import myschedule.web.SchedulerSettings;
 import myschedule.web.SchedulerStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.vaadin.dialogs.ConfirmDialog;
-
-import java.util.List;
 
 /**
  * UI screen for displaying a dashboard of all schedulers in a table view. This is the default main screen for the
@@ -39,6 +42,14 @@ public class DashboardScreen extends VerticalLayout {
     }
 
     private void initToolbar() {
+    	UI.getCurrent().getPage().getStyles().add("*{scrollbar-width: thin;}"
+    			+ "*::-webkit-scrollbar {\r\n"
+    			+ "  width: 5px;\r\n"
+    			+ "  height: 8px;\r\n"
+    			+ "  background-color: #EAEAEA; /* or add it to the track */\r\n"
+    			+ "}*::-webkit-scrollbar-thumb {\r\n"
+    			+ "    background: #aaa;\r\n"
+    			+ "}");
         toolbar = new HorizontalLayout();
         addComponent(toolbar);
 
