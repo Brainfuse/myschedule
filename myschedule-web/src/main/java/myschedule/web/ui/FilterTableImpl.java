@@ -1,6 +1,7 @@
 package myschedule.web.ui;
 
 import static java.util.stream.Collectors.toList;
+import static myschedule.web.ui.FilterTableImpl.toolsCStr;
 import static myschedule.web.ui.FilteredHistoryTable.DATE_FORMAT;
 import static myschedule.web.ui.FilteredHistoryTable.EVENT_NAME;
 import static myschedule.web.ui.FilteredHistoryTable.EVENT_TIME;
@@ -36,7 +37,9 @@ import com.vaadin.data.Container;
 import com.vaadin.data.Container.Filter;
 import com.vaadin.data.Container.Filterable;
 import com.vaadin.data.Item;
+import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.IndexedContainer;
+import com.vaadin.data.util.PropertyValueGenerator;
 import com.vaadin.data.util.sqlcontainer.SQLContainer;
 import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
 import com.vaadin.data.util.sqlcontainer.query.OrderBy;
@@ -57,6 +60,38 @@ interface FilterTableImpl {
 	void removeFilter(String columnID);
 
 	void addFilter(String columnID, Filter filter);
+	
+	/**
+	 * Copied from Tools.cStr we don't have core library imports here except
+	 * return empty string instead of null
+	 * 
+	 * @param value
+	 * @param trim
+	 * @return
+	 */
+	static String toolsCStr(Object value, boolean trim) {
+		if (value == null) 
+			return "";
+		String retValue = null;
+		if (value instanceof java.sql.Clob) {
+			Clob clob = (Clob) value;
+			try {
+				retValue = clob.getSubString(1, (int) clob.length());
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			retValue = value.toString();
+		}
+		
+		if (retValue == null)
+			return "";
+
+		if (trim)
+			retValue = retValue.trim();
+
+		return retValue;
+	}
 
 	static class HistoryRecordBean {
 
@@ -292,36 +327,7 @@ interface FilterTableImpl {
 			return cachedTableData;
 		}
 
-		/**
-		 * Copied from Tools.cStr we don't have core library imports here except
-		 * return empty string instead of null
-		 * 
-		 * @param value
-		 * @param trim
-		 * @return
-		 */
-		private static String toolsCStr(Object value, boolean trim) {
-			if (value != null) {
-
-				String retValue = null;
-				if (value instanceof java.sql.Clob) {
-					Clob clob = (Clob) value;
-					try {
-						retValue = clob.getSubString(1, (int) clob.length());
-					} catch (SQLException e) {
-						throw new RuntimeException(e);
-					}
-				} else {
-					retValue = value.toString();
-				}
-
-				if (trim)
-					retValue = retValue.trim();
-
-				return retValue;
-			}
-			return "";
-		}
+		
 
 		private String toDateStr(Date date, SimpleDateFormat df) {
 			if (date == null)
@@ -390,6 +396,7 @@ interface FilterTableImpl {
 		private String tableName;
 		private String schedulerSettingsName;
 		private SQLContainer container;
+		private GeneratedPropertyContainer gpContainer;
 		private JDBCConnectionPool connectionPool;
 		private HistoryRecordListHolder cachedFiltersData;
 
@@ -440,6 +447,25 @@ interface FilterTableImpl {
 			sqlContainer.addOrderBy(new OrderBy("EVENT_TIME", false));
 			initFilters();
 			container = sqlContainer;
+			gpContainer = new GeneratedPropertyContainer(sqlContainer);
+			gpContainer.addGeneratedProperty("INFO5", new PropertyValueGenerator<String>() {
+
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 789667906352677081L;
+
+				@Override
+				public String getValue(Item item, Object itemId,
+						Object propertyId) {
+					return toolsCStr(item.getItemProperty("INFO5").getValue(), true);
+				}
+
+				@Override
+				public Class<String> getType() {
+					return String.class;
+				}
+			});
 		}
 
 		void initFilters() throws SQLException {
@@ -467,7 +493,7 @@ interface FilterTableImpl {
 
 		@Override
 		public Filterable getContainer() {
-			return container;
+			return gpContainer;
 		}
 
 		@Override

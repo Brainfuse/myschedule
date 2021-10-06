@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.PopupView;
+import com.vaadin.ui.UI;
 
 import myschedule.web.MySchedule;
 
@@ -32,6 +33,7 @@ public class JobsHistoriesContent extends FullSizeVerticalLayout {
         this.myScheduleUi = myScheduleUi;
         this.schedulerSettingsName = schedulerSettingsName;
         setId("jobHistoryContent");
+        addStyleName("jobHistoryContent");
         
         filteredTable = new FilteredHistoryTable(schedulerSettingsName);
         initToolbar();
@@ -42,6 +44,11 @@ public class JobsHistoriesContent extends FullSizeVerticalLayout {
         toolbar = new HorizontalLayout();
         addComponent(toolbar);
         filtersPopup = new PopupView("", filteredTable.getFiltersLayout());
+        filtersPopup.setHideOnMouseOut(false);
+        filtersPopup.addStyleName("jobHistoryContentFilter");
+        
+        UI.getCurrent().getPage().getStyles().add(".v-popupview-popup-jobHistoryContentFilter.v-popupview-popup {max-height: 100vh; max-width: 30vw; overflow:hidden !important;}"
+        		+ ".v-popupview-popup-jobHistoryContentFilter.v-popupview-popup > .popupContent > .v-verticallayout{max-height:100vh;overflow: auto}");
 		toolbar.addComponent(createFiltersButton());
         toolbar.addComponent(filtersPopup);
         toolbar.addComponent(createRefreshButton());
