@@ -1,12 +1,16 @@
 package myschedule.web.ui;
 
+import static java.util.stream.Collectors.toCollection;
+
 import java.rmi.RemoteException;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -22,10 +26,10 @@ import com.vaadin.data.util.filter.Compare;
 import com.vaadin.data.util.filter.Or;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
-import com.vaadin.ui.AbstractLayout;
 import com.vaadin.ui.Accordion;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -56,23 +60,31 @@ public class FilteredHistoryTable extends CustomComponent {
 		}
 
 		public CheckboxGroup init() {
-
+			this.setWidth(100, Unit.PERCENTAGE);
+			
 			VerticalLayout layout = new VerticalLayout();
 			layout.setWidth(100, Unit.PERCENTAGE);
-
+			
+			
 			setCompositionRoot(layout);
 
 			if (boxesNames == null || boxesNames.isEmpty()) {
 				return this;
 			}
 
-			for (String name : boxesNames) {
-				if (name == null)
-					continue;
-				CheckBox cb = new CheckBox(name);
-				cb.setValue(true);// default checked
-				checkboxes.add(cb);
-			}
+			boxesNames.stream().filter(Objects::nonNull)
+				.sorted().map(name->{
+					CheckBox cb = new CheckBox(name);
+					cb.setValue(true);// default checked
+					return cb;
+				}).collect(toCollection(()->checkboxes));
+
+			
+			
+//			checkboxes.addAll(IntStream.range(0, 20)
+//					.mapToObj(i -> new CheckBox("Test Boxx " + i))
+//					.collect(toList()));
+			 			
 
 			Button selectAllBtn = new Button("All");
 			selectAllBtn.addClickListener(event -> selectAllOrNone(true));
@@ -161,12 +173,17 @@ public class FilteredHistoryTable extends CustomComponent {
 					Date inputEnd = end.getValue() == null ? new Date()
 							: end.getValue();
 					final Date filterStart = inputStart.before(inputEnd)
-							? inputStart : inputEnd;
+							? inputStart
+							: inputEnd;
 					final Date filterEnd = inputStart.before(inputEnd)
-							? inputEnd : inputStart;
+							? inputEnd
+							: inputStart;
 					logger.debug("filter dates {} ~ {}", filterStart,
 							filterEnd);
-					addContainerFilter(columnID, new Between(EVENT_TIME, filterStart, filterEnd));
+					addContainerFilter(columnID,
+							new Between(EVENT_TIME,
+									new Timestamp(filterStart.getTime()),
+									new Timestamp(filterEnd.getTime())));
 
 				}
 			};
@@ -260,7 +277,7 @@ public class FilteredHistoryTable extends CustomComponent {
 
 	private Container.Filterable container;
 
-	private AbstractLayout filtersLayout;
+	private Component filtersLayout;
 
 	private final String schedulerSettingsName;
 
@@ -280,6 +297,7 @@ public class FilteredHistoryTable extends CustomComponent {
 //			HorizontalLayout rootComponent = new HorizontalLayout();
 			setSizeFull();
 			setCompositionRoot(table);
+			
 //			rootComponent.setSplitPosition(250, Unit.PIXELS);
 //			rootComponent.setHeight(600, Unit.PIXELS);
 			
@@ -289,10 +307,12 @@ public class FilteredHistoryTable extends CustomComponent {
 			this.filterImpl = FilterTableImpl.getSQLImpl(schedulerSettingsName);
 			this.container = filterImpl.getContainer();
 			// setup the contents for filter panel
-			filtersLayout = new VerticalLayout();
+			VerticalLayout filtersLayout = new VerticalLayout();
 			filtersLayout.setSizeFull();
+//			filtersLayout.setSizeUndefined();
 			HistoryRecordListHolder holder = filterImpl.getCachedFiltersData();
 			Accordion accordion = new Accordion();
+			accordion.setWidth(100, Unit.PERCENTAGE);
 			accordion.addTab(
 					new CheckboxGroup(HOST_IP_NAME, holder.getHostIPs()).init(),
 					HOST_IP_NAME);
@@ -310,9 +330,7 @@ public class FilteredHistoryTable extends CustomComponent {
 			accordion.addTab(new DateRangeField(EVENT_TIME).init(), EVENT_TIME);
 			
 			//info 1 is the job key
-			accordion.addTab(
-					new TextContainsFilter(INFO_1).init(),
-					INFO_1);
+			accordion.addTab(new TextContainsFilter(INFO_1).init(), INFO_1);
 			//info 2 is the job name
 			accordion.addTab(new CheckboxGroup(INFO_2, holder.getInfo2()).init(), INFO_2);
 			accordion.addTab(new TextContainsFilter(INFO_3).init(), INFO_3);
@@ -320,8 +338,10 @@ public class FilteredHistoryTable extends CustomComponent {
 			accordion.addTab(new TextContainsFilter(INFO_5).init(), INFO_5);
 			
 			//default to open the event time tab
-			accordion.setSelectedTab(4);
+			accordion.setSelectedTab(6);
 			filtersLayout.addComponent(accordion);
+			filtersLayout.setExpandRatio(accordion, 1f);
+			this.filtersLayout = filtersLayout;
 
 			// set the the tables to display actual data
 			table.setSizeFull();
@@ -444,7 +464,7 @@ public class FilteredHistoryTable extends CustomComponent {
 		filterImpl.addFilter(columnID, filter);
 	}
 
-	public AbstractLayout getFiltersLayout() {
+	public Component getFiltersLayout() {
 		return filtersLayout;
 	}
 }
