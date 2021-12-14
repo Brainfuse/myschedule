@@ -16,7 +16,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<quartz.version>2.2.1</quartz.version>
+		<quartz.version>2.3.2</quartz.version>
 		<slf4j.version>1.7.5</slf4j.version>
 		<vaadin.version>7.4.8</vaadin.version>
 		<groovy.version>2.1.6</groovy.version>
