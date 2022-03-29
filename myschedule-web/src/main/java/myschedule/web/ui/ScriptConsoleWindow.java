@@ -10,7 +10,7 @@ import org.vaadin.aceeditor.AceEditor;
 import org.vaadin.aceeditor.AceMode;
 import org.vaadin.aceeditor.AceTheme;
 
-import com.vaadin.data.Property;
+import com.vaadin.server.VaadinService;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
@@ -85,14 +85,11 @@ public class ScriptConsoleWindow extends AbstractWindow {
 
         // On selection value change even handler, let's update the editor content
         templatesList.setImmediate(true);
-        templatesList.addValueChangeListener(new Property.ValueChangeListener() {
-            @Override
-            public void valueChange(Property.ValueChangeEvent event) {
-                String name = (String) event.getProperty().getValue();
-                String text = mySchedule.getScriptTemplatesStore().get(name);
-                editor.setValue(text);
-            }
-        });
+        templatesList.addValueChangeListener(event -> {
+		    String name = (String) event.getProperty().getValue();
+		    String text = mySchedule.getScriptTemplatesStore().get(name);
+		    editor.setValue(text);
+		});
     }
 
     protected void initEditor() {
@@ -108,9 +105,10 @@ public class ScriptConsoleWindow extends AbstractWindow {
         editor.setHeight(400, Unit.PIXELS);
         editor.setSizeFull();
         editor.setUseWorker(false);
-        editor.setThemePath("/quartz/static/ace");
-        editor.setModePath("/quartz/static/ace");
-        editor.setWorkerPath("/quartz/static/ace");   
+        String staticBaseDir = VaadinService.getCurrentRequest().getContextPath();
+        editor.setThemePath(staticBaseDir + "/static/ace");
+        editor.setModePath(staticBaseDir + "/static/ace");
+        editor.setWorkerPath(staticBaseDir + "/static/ace");
         consoleContent.addComponent(editor);
     }
 
@@ -137,43 +135,34 @@ public class ScriptConsoleWindow extends AbstractWindow {
 
         // Create the run script button.
         Button button = new Button("Run Script");
-        button.addClickListener(new Button.ClickListener() {
-            @Override
-            public void buttonClick(Button.ClickEvent event) {
-                String scriptText = editor.getValue();
-                String scriptEngineName = (String) scriptEngineList.getValue();
-                runScriptText(scriptEngineName, scriptText);
-                myScheduleUi.loadSchedulerScreen(schedulerSettingsName);
-            }
-        });
+        button.addClickListener(event -> {
+		    String scriptText = editor.getValue();
+		    String scriptEngineName = (String) scriptEngineList.getValue();
+		    runScriptText(scriptEngineName, scriptText);
+		    myScheduleUi.loadSchedulerScreen(schedulerSettingsName);
+		});
         controls.addComponent(button);
 
         // Save as ... button - save content of editor as new template.
         button = new Button("Save Script as Template ...");
         controls.addComponent(button);
-        button.addClickListener(new Button.ClickListener() {
-            @Override
-            public void buttonClick(Button.ClickEvent event) {
-                // Prompt to get a name.
-                InputPromptWindow prompt = new InputPromptWindow("Please enter a script template name (with extension)",
-                        new InputPromptWindow.InputAction() {
-                            @Override
-                            public void onInputOk(String inputValue) {
-                                // Save template content.
-                                String name = inputValue;
-                                String configText = editor.getValue();
-                                if (StringUtils.isEmpty(name))
-                                    throw new RuntimeException("Template name can not be empty.");
-                                LOGGER.debug("Saving editor content as new script template: " + name);
-                                mySchedule.getScriptTemplatesStore().add(name, configText);
+        button.addClickListener(event -> {
+		    // Prompt to get a name.
+		    InputPromptWindow prompt = new InputPromptWindow("Please enter a script template name (with extension)",
+		            inputValue -> {
+					    // Save template content.
+					    String name = inputValue;
+					    String configText = editor.getValue();
+					    if (StringUtils.isEmpty(name))
+					        throw new RuntimeException("Template name can not be empty.");
+					    LOGGER.debug("Saving editor content as new script template: " + name);
+					    mySchedule.getScriptTemplatesStore().add(name, configText);
 
-                                // Show it on template list
-                                templatesList.addItem(name);
-                            }
-                        });
-                myScheduleUi.addWindow(prompt);
-            }
-        });
+					    // Show it on template list
+					    templatesList.addItem(name);
+					});
+		    myScheduleUi.addWindow(prompt);
+		});
     }
 
     private void runScriptText(String scriptEngineName, String scriptText) {
