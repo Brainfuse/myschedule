@@ -157,7 +157,7 @@ public class MySchedule extends AbstractService {
 
 	private void initSchedulerSettingsMap() {
 		// Load up all scheduler settings from config dir files.
-		schedulerSettingsMap = new HashMap<String, SchedulerSettings>();
+		schedulerSettingsMap = new HashMap<>();
         for (SchedulerSettings settings : schedulerSettingsStore.getAll())
             schedulerSettingsMap.put(settings.getSettingsName(), settings);
 	}
@@ -175,7 +175,7 @@ public class MySchedule extends AbstractService {
 
 	private void initSchedulersMap() {
 		// Init the map first
-		schedulersMap = new HashMap<String, SchedulerTemplate>();
+		schedulersMap = new HashMap<>();
 		
 		// Create and init all schedulersMap using schedulerSettingsMap
 		for (SchedulerSettings settings : schedulerSettingsMap.values()) {
@@ -337,7 +337,7 @@ public class MySchedule extends AbstractService {
 	}
 	
 	public List<String> getSchedulerSettingsNames() {
-		return new ArrayList<String>(schedulerSettingsMap.keySet());
+		return new ArrayList<>(schedulerSettingsMap.keySet());
 	}
 	
 	public SchedulerSettings getSchedulerSettings(String settingsName) {

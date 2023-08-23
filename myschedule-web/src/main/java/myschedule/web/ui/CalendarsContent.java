@@ -1,14 +1,16 @@
 package myschedule.web.ui;
 
-import com.vaadin.ui.Table;
-import com.vaadin.ui.VerticalLayout;
-import myschedule.quartz.extra.SchedulerTemplate;
-import myschedule.web.MySchedule;
+import java.util.List;
+
 import org.quartz.Calendar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
+import com.vaadin.ui.Table;
+import com.vaadin.ui.VerticalLayout;
+
+import myschedule.quartz.extra.SchedulerTemplate;
+import myschedule.web.MySchedule;
 
 /**s
  * This content view shows Quartz calendar objects that are mainly used for date exclusions on triggers/jobs.

@@ -158,35 +158,43 @@ extends JdbcSchedulerHistoryPlugin implements SchedulerPlugin, Serializable, Rem
     private int[] columnSqlTypes;
     private Boolean exportRMI;
 
-    public void setSchedulerContextKey(String schedulerContextKey) {
+    @Override
+	public void setSchedulerContextKey(String schedulerContextKey) {
         this.schedulerContextKey = schedulerContextKey;
     }
 
-    public void setDataSourceName(String dataSourceName) {
+    @Override
+	public void setDataSourceName(String dataSourceName) {
         this.dataSourceName = dataSourceName;
     }
 
-    public void setQuerySql(String querySql) {
+    @Override
+	public void setQuerySql(String querySql) {
         this.querySql = querySql;
     }
 
-    public void setInsertSql(String insertSql) {
+    @Override
+	public void setInsertSql(String insertSql) {
         this.insertSql = insertSql;
     }
 
-    public void setDeleteSql(String deleteSql) {
+    @Override
+	public void setDeleteSql(String deleteSql) {
         this.deleteSql = deleteSql;
     }
 
-    public void setDeleteIntervalInSecs(long deleteIntervalInSecs) {
+    @Override
+	public void setDeleteIntervalInSecs(long deleteIntervalInSecs) {
         this.deleteIntervalInSecs = deleteIntervalInSecs;
     }
 
-    public long getDeleteIntervalInSecs() {
+    @Override
+	public long getDeleteIntervalInSecs() {
         return deleteIntervalInSecs;
     }
 
-    public List<List<Object>> getJobHistoryData() {
+    @Override
+	public List<List<Object>> getJobHistoryData() {
         final List<List<Object>> result = new ArrayList<List<Object>>();
         withConn(new ConnAction() {
             @Override
@@ -206,7 +214,8 @@ extends JdbcSchedulerHistoryPlugin implements SchedulerPlugin, Serializable, Rem
         return result;
     }
 
-    public int deleteJobHistory(final Date olderThanDate) {
+    @Override
+	public int deleteJobHistory(final Date olderThanDate) {
         logger.debug("Delete SQL: {}", deleteSql);
         final List<Integer> result = new ArrayList<Integer>();
         withConn(new ConnAction() {
@@ -746,19 +755,23 @@ extends JdbcSchedulerHistoryPlugin implements SchedulerPlugin, Serializable, Rem
         }
     }
 
-    public String getInsertSql() {
+    @Override
+	public String getInsertSql() {
         return insertSql;
     }
 
-    public String getQuerySql() {
+    @Override
+	public String getQuerySql() {
         return querySql;
     }
 
-    public String getDeleteSql() {
+    @Override
+	public String getDeleteSql() {
         return deleteSql;
     }
 
-    public String getSchedulerContextKey() {
+    @Override
+	public String getSchedulerContextKey() {
         return schedulerContextKey;
     }
 }
