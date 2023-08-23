@@ -1,10 +1,10 @@
 package myschedule.web;
 
-import myschedule.quartz.extra.util.Props;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
+import myschedule.quartz.extra.util.Props;
 
 /**
  * A class to holder a Quartz Scheduler configuration (quartz.properties) and extra settings to be manage by 
@@ -28,6 +28,11 @@ public class SchedulerSettings {
         this.settingsName = settingsName;
 		this.settingsUrl = settingsUrl;
 		this.props = new Props(settingsUrl);
+		/*
+		 * Allow QUARTZ INSTANCE ID to be resolved from an env variable. This is useful 
+		 * incase of inside a POD.
+		 */
+		this.props.expandVariables();
 	}
 
     public String getSettingsName() {
@@ -83,7 +88,7 @@ public class SchedulerSettings {
      */
     public Map<String, String> getPluginClassNames() {
         if (pluginClassNames == null) {
-            pluginClassNames = new HashMap<String, String>();
+            pluginClassNames = new HashMap<>();
             Properties props = getQuartzProperties();
             String pluginPrefix = "org.quartz.plugin.";
             for (String name : props.stringPropertyNames()) {
